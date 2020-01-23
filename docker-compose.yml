@@ -12,7 +12,7 @@ networks:
     my_network:
     proxy_ext_network:
         external: true
-          
+
 services:
     npm:
         build:
