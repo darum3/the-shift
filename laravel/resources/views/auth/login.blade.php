@@ -8,6 +8,11 @@
                 <div class="card-header text-white bg-dark ">{{ __('Login') }}</div>
 
                 <div class="card-body">
+                    @isset($message)
+                    <div class='alert alert-danger' role='alert'>
+                        {{$message}}
+                    </div>
+                    @endif
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
