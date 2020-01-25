@@ -32,6 +32,7 @@ services:
         volumes: 
             - ./composer:/composer
             - ./laravel:/laravel
+            - ./php.ini:/usr/local/etc/php/php.ini
         user: ${UID}
     artisan:
         build: 
@@ -41,6 +42,7 @@ services:
                 - PHP_VERSION
         volumes:
             - src:/laravel
+            - ./php.ini:/usr/local/etc/php/php.ini
         depends_on:
             - composer
         user: "${UID}"
@@ -54,6 +56,7 @@ services:
                 - PHP_VERSION
         volumes:
             - src:/laravel
+            - ./php.ini:/usr/local/etc/php/php.ini
         depends_on:
             - composer
         user: "${UID}"
@@ -67,7 +70,8 @@ services:
                 - PHP_VERSION
         volumes: 
             - src:/laravel
-            - ./laravel/php.ini:/usr/local/etc/php/php.ini
+#            - ./laravel/php.ini:/usr/local/etc/php/php.ini
+            - ./php.ini:/usr/local/etc/php/php.ini
         environment: 
             - TZ=Asia/Tokyo
         depends_on:
