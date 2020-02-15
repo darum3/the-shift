@@ -5,6 +5,7 @@ namespace App\Listeners\Database;
 use App\Events\CommonSaving;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Str;
 
 class SysInfoSetting
 {
@@ -29,13 +30,17 @@ class SysInfoSetting
         $model = $event->model;
 
         $trace = debug_backtrace();
-        for($i = 2; $i < count($trace); ++$i) {
-            if (isset($trace[$i]['class']) && $trace[$i]['class'] === 'Illuminate\Database\Eloquent\Model' && $trace[$i]['function'] === 'save') {
+        for($i = count($trace) - 1; $i >= 0; --$i) {
+            if(isset($trace[$i]['class']) && Str::startsWith($trace[$i]['class'], 'App') && Str::endsWith($trace[$i]['class'], 'Controller')) {
                 break;
             }
         }
-        $class = isset($trace[$i + 1]) ? $trace[$i + 1]['class'] : 'Unknown';
-
-        $model->sysinfo = $class;
+        if (!isset($trace[$i])) {
+            $model->sysinfo = 'Unknown';
+            return;
+        }
+        $classArray = explode('\\', $trace[$i]['class']);
+        $info = end($classArray).'::'.$trace[$i]['function'];
+        $model->sysinfo = $info;
     }
 }
