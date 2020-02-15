@@ -1,4 +1,6 @@
-# finest
+# the-shift
+
+シフト管理
 
 ## 開発環境前提
 
@@ -16,6 +18,7 @@
 * `cd laravel`
 * `cp .env.example .env`
 * `cd ..`
+* 必要に応じてdocker-compose-dev.yml でMysqlのポート修正
 * `./dev.sh run artisan key:generate`
 * `./dev.sh run npm i`
 * `./dev.sh run npm run dev`
