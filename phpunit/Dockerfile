@@ -1,7 +1,7 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}
 
-LABEL MAINTAINER Yamashita<r.yamashita@edge-tech.co.jp>
+LABEL MAINTAINER Yamashita<darum@yamas.xyz>
 
 RUN apt-get -y update && \
     apt-get -y install libpng-dev libzip-dev
