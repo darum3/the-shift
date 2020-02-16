@@ -68,6 +68,7 @@ class DataBaseQueryServiceProvider extends ServiceProvider
             }
         }
         $filepos = isset($trace[$i]) ? $trace[$i]['file'] . ':' . $trace[$i]['line'] : 'Unknown';
+        return $filepos;
     }
 
     /**
