@@ -62,6 +62,8 @@ services:
         depends_on:
             - composer
         user: "${UID}"
+        networks:
+            - my_network
         environment:
             - TZ=Asia/Tokyo
     laravel:
