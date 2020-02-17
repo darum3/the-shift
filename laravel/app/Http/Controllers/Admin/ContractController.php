@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Eloquents\Contract;
+use App\Eloquents\Group;
+use App\Eloquents\UserGroup;
+use App\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ContractInputConfirm;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ContractController extends Controller
 {
@@ -28,9 +31,38 @@ class ContractController extends Controller
 
     public function inputExec(ContractInputConfirm $request)
     {
-        Contract::create([
-            'name' => $request->name,
-        ]);
+        if ($request->has('back')) {
+            return redirect()->route('admin.contract.input')->withInput();
+        }
+
+        DB::transaction(function () use($request) {
+            // Add Contract
+            $contract = Contract::create([
+                'name' => $request->name,
+            ]);
+
+            $group = Group::create([
+                'contract_id' => $contract->id,
+                'name' => '管理グループ',
+                'flg_admin' => true,
+            ]);
+
+            $user = User::whereEmail($request->email)->first();
+            if (is_null($user)) {
+                $user = User::create([
+                    'name' => $request->user_name,
+                    'email' => $request->email,
+                    'password' => bcrypt('password'), // TODO 初期パスワード
+                ]);
+            }
+
+            UserGroup::create([
+                'group_id' => $group->id,
+                'user_id' => $user->id,
+                'flg_admin' => true,
+            ]);
+        });
+
         $request->session()->flash('contract-input-success');
         return redirect()->route('admin.contract');
     }

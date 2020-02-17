@@ -18,13 +18,15 @@
     <table class="table table-bordered table-hover">
         <thead class='thead-dark'>
             <tr>
-                <th scope='col' style='width: 20%'>会社名</th>
+                <th scope='col' style='width: 25%'>会社名</th>
+                <th scope='col' style='width: 8%'>&nbsp;</th>
             </tr>
         </thead>
         <tbody class='table-striped'>
             @foreach($contract as $row)
             <tr>
                 <td>{{$row->name}}</td>
+                <td>TODO: 詳細</td>
             </tr>
             @endforeach
         </tbody>

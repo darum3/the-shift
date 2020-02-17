@@ -9,6 +9,9 @@ services:
     laravel:
         depends_on: 
             - dev_mysql
+    phpunit:
+        depends_on:
+            - dev_mysql
     dev_mysql:
         build:
             context: ./

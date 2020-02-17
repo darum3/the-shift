@@ -26,10 +26,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        foreach(config('users.groups') as $code => $group) {
-            Gate::define($code, function() use($group) {
-                return Auth::user()->{$group['column']};
-            });
-        }
+        Gate::define('ADM', function() {
+            return Auth::user()->isSysAdmin();
+        });
     }
 }

@@ -25,6 +25,8 @@ class ContractInputConfirm extends FormRequest
     {
         return [
             'name' => 'required|string|max:50',
+            'email' => 'required|email|max:255',
+            'user_name' => 'required|string|max:255',
         ];
     }
 
@@ -33,6 +35,14 @@ class ContractInputConfirm extends FormRequest
         return [
             'name.required' => '契約名の指定は必須です',
             'name.max' => '契約名は50文字以内です',
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'email' => 'メールアドレス',
+            'user_name' => '管理ユーザ名',
         ];
     }
 }
