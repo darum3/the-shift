@@ -18,6 +18,12 @@ class ContractController extends Controller
         return view('admin.contract.list', compact('contract'));
     }
 
+    public function show(int $id)
+    {
+        $contract = Contract::findOrFail($id)->load('groups', 'groups.users');
+        return view('admin.contract.show', compact('contract'));
+    }
+
     public function input()
     {
         return view('admin.contract.input');

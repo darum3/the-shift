@@ -38,4 +38,16 @@ class ContractTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('admin.contract.input');
     }
+
+    public function test詳細が表示できること() {
+        $response = $this->actingAs($this->user)->get('/admin/contract/');
+        $response->assertOk();
+
+        $response->assertSeeTextInOrder([$this->contract->name, '詳細']);
+        $response->assertDontSee('TODO');
+
+        $response = $this->actingAs($this->user)->get('/admin/contract/show/'.$this->contract->id);
+        $response->assertOk()->assertViewIs('admin.contract.show')->assertSee(htmlspecialchars('【'.$this->contract->name.'】', ENT_QUOTES));
+
+    }
 }
