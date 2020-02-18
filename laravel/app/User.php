@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Eloquents\Group;
+use App\Eloquents\UserGroup;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -37,8 +39,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, UserGroup::class);
+    }
+
     public function isSysAdmin()
     {
         return $this->flg_system_admin == true;
     }
+
+    // public function isManager()
+    // {
+    //     return $this->load()
+    // }
 }

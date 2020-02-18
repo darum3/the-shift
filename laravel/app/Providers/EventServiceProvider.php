@@ -24,6 +24,12 @@ class EventServiceProvider extends ServiceProvider
         CommonSaving::class => [
             SysInfoSetting::class,
         ],
+        'Illuminate\Auth\Events\Login' => [
+            'App\Listeners\LogSuccessfulLogin',
+        ],
+        'Illuminate\Auth\Events\Authenticated' => [
+            'App\Listeners\LogAuthenticated',
+        ],
     ];
 
     /**
