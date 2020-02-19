@@ -29,5 +29,10 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('ADM', function() {
             return Auth::user()->isSysAdmin();
         });
+
+        Gate::define('MNG', function() {
+            $contractGroup = Auth::user()->groups->first(function($item) { return $item->contract_id == session('contract_id'); });
+            return $contractGroup ? $contractGroup->flg_admin : false;
+        });
     }
 }

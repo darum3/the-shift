@@ -34,10 +34,13 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
                         <li class='nav-item'>@yield('sub_menu')</li>
+                        {{-- TODO
                         <!-- ページ名 -->
                         <li class='nav-item'>
                             <a class='nav-link' href='#'>@yield('page_title')</a>
                         </li>
+                        --}}
+                        <li class='nav-item'>@can('MNG')<a href="{{ route('manage.work_type') }}" class='nav-link'>職種設定</a>@endcan</li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -56,9 +59,11 @@
                             @endif
                         @else
                             {{-- TODO 管理者権限のみ --}}
+                            @can('ADM')
                             <li class="nav-item">
                                 <a href="{{ route('admin.contract') }}" class='nav-link'>契約管理</a>
                             </li>
+                            @endcan
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }} <span class="caret"></span>
