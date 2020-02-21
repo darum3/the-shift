@@ -40,7 +40,11 @@
                             <a class='nav-link' href='#'>@yield('page_title')</a>
                         </li>
                         --}}
-                        <li class='nav-item'>@can('MNG')<a href="{{ route('manage.work_type') }}" class='nav-link'>職種設定</a>@endcan</li>
+                        {{-- TODO 各layoutsのブロックのレイアウトにもっていく？ --}}
+                        @can('MNG')
+                        <li class='nav-item'><a href="{{ route('manage.work_type') }}" class='nav-link'>職種設定</a></li>
+                        <li class='nav-item'><a href="{{ route('manage.group') }}" class='nav-link'>グループ設定</a></li>
+                        @endcan
                     </ul>
 
                     <!-- Right Side Of Navbar -->

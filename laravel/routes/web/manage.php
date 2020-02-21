@@ -9,3 +9,12 @@ Route::group(['prefix' => 'work_type'], function() {
     });
 });
 
+Route::group(['prefix' => '/group'], function() {
+    Route::get('/', 'GroupController@index')->name('manage.group');
+    Route::group(['prefix' => 'add'], function() {
+        Route::get('/', 'GroupController@input')->name('manage.group.add.input');
+        Route::post('/confirm', 'GroupController@confirm')->name('manage.group.add.confirm');
+        Route::post('/exec', 'GroupController@exec')->name('manage.group.add.exec');
+    });
+});
+

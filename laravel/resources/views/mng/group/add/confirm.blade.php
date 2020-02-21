@@ -1,7 +1,7 @@
 @extends('layouts.manage')
 
 @section('page_title')
-職種追加-確認
+グループ追加-確認
 @endsection
 
 @section('content')
