@@ -16,5 +16,10 @@ Route::group(['prefix' => '/group'], function() {
         Route::post('/confirm', 'GroupController@confirm')->name('manage.group.add.confirm');
         Route::post('/exec', 'GroupController@exec')->name('manage.group.add.exec');
     });
+    Route::group(['prefix' => '{id}/admin_add'], function() {
+        Route::get('/', 'AdminAddController@input')->name('manage.group.admin_add.input');
+        Route::post('/confirm', 'AdminAddController@confirm')->name('manage.group.admin_add.confirm');
+        Route::post('/exec', 'AdminAddController@exec')->name('manage.group.admin_add.exec');
+    });
 });
 

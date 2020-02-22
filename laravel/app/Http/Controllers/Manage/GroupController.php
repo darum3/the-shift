@@ -11,7 +11,7 @@ class GroupController extends Controller
 {
     public function index()
     {
-        $groups = Group::whereContractId(session('contract_id'))->where('flg_admin', false)->get();
+        $groups = Group::whereContractId(session('contract_id'))->where('flg_admin', false)->with('users')->get();
         return view('mng.group.list', compact('groups'));
     }
 
