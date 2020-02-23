@@ -33,17 +33,18 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                        <li class='nav-item'>@yield('sub_menu')</li>
                         {{-- TODO
+                        <li class='nav-item'>@yield('sub_menu')</li>
                         <!-- ページ名 -->
                         <li class='nav-item'>
                             <a class='nav-link' href='#'>@yield('page_title')</a>
                         </li>
                         --}}
-                        {{-- TODO 各layoutsのブロックのレイアウトにもっていく？ --}}
                         @can('MNG')
                         <li class='nav-item'><a href="{{ route('manage.work_type') }}" class='nav-link'>職種設定</a></li>
                         <li class='nav-item'><a href="{{ route('manage.group') }}" class='nav-link'>グループ設定</a></li>
+                        @elsecan('G-MNG')
+                        <li class='nav-item'><a href="{{ route('g-manage.user')}}" class='nav-link'>ユーザ設定</a></li>
                         @endcan
                     </ul>
 
