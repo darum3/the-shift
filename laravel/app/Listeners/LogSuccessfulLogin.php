@@ -28,6 +28,7 @@ class LogSuccessfulLogin
      */
     public function handle(Login $event)
     {
+        logger(Auth::user()->groups);
         $contractIds = [];
         foreach(Auth::user()->groups as $group) {
             $contractIds[] = $group->contract_id;
@@ -37,5 +38,10 @@ class LogSuccessfulLogin
             dd('TODO Multi Contract User');
         }
         session(['contract_id' => $contractIds[0]]);
+
+        // 所属グループが1つの場合はグループIDをセットする
+        if (Auth::user()->groups->count() == 1) {
+            session(['group_id' => Auth::user()->groups->first()->id]);
+        }
     }
 }
