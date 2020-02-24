@@ -3,7 +3,7 @@
         @foreach($fields as $field)
         <tr>
             <th scope='col' style="width: 16%" class='table-success'>{{$field['label']}}</th>
-            <td>{{$data[$field['name']]}}</td>
+            <td>@if(isset($field['type']) && $field['type'] == 'password')********@else{{$data[$field['name']]}}@endif</td>
         </tr>
         @endforeach
     </tbody>

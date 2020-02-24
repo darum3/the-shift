@@ -10,6 +10,10 @@
 <div class='alert alert-success'>
     追加しました
 </div>
+@elseif(session('user.del.success'))
+<div class='alert alert-success'>
+    削除しました
+</div>
 @endif
 <div class='row'>
     <div class='col-sm-6'>
@@ -23,6 +27,7 @@
         <table class='table table-striped table-sm'>
             <thead class='table-success'>
                 <tr>
+                    <th scope='col'>&nbsp;</th>
                     <th scope='col'>名前</th>
                     <th scope='col'>メールアドレス</th>
                     <th scope='col'>管理者</th>
@@ -31,6 +36,14 @@
             <tbody>
                 @foreach($group->users as $user)
                 <tr>
+                    <td>
+                        @if($user->id !== Auth::user()->id)
+                        <form method=POST action="{{route('g-manage.user.del.confirm', ['user_id' => $user->id])}}">
+                            @csrf
+                            <button class='btn btn-warning btn-sm'>削除</button>
+                        </form>
+                        @endif
+                    </td>
                     <td>{{$user->name}}</td>
                     <td>{{$user->email}}</td>
                     <td>@if($user->pivot->flg_admin)○@endif</td>

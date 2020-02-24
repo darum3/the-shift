@@ -12,6 +12,6 @@ class Group extends BaseModel
 
     public function users()
     {
-        return $this->belongsToMany(User::class, UserGroup::class)->withPivot('flg_admin');
+        return $this->belongsToMany(User::class, UserGroup::class)->withPivot('flg_admin', 'deleted_at');
     }
 }
