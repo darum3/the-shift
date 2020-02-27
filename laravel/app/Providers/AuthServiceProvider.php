@@ -38,7 +38,7 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('MNG', function() {
             $group = Group::whereContractId(session('contract_id'))->whereFlgAdmin(true)->first();
-            return optional(UserGroup::whereUserId(Auth::user()->id)->whereGroupId($group->id))->count() > 0;
+            return optional(UserGroup::whereUserId(Auth::user()->id)->whereGroupId(optional($group)->id))->count() > 0;
         });
 
         Gate::define('G-MNG', function() {

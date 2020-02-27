@@ -28,7 +28,9 @@ class LogSuccessfulLogin
      */
     public function handle(Login $event)
     {
-        logger(Auth::user()->groups);
+        if (Auth::user()->flg_system_admin) {
+            return;
+        }
         $contractIds = [];
         foreach(Auth::user()->groups as $group) {
             $contractIds[] = $group->contract_id;
