@@ -13,3 +13,7 @@ yarn-error.log
 
 /.config
 /.npm
+
+/public/js/*.js
+/public/css/*.css
+/public/mix-manifest.json

@@ -23,7 +23,7 @@ services:
             - ./mysql/data:/var/lib/mysql
             - ./mysql/conf.d:/etc/mysql/conf.d
         ports:
-            - "3306:3306"
+            - "13306:3306"
         networks: 
             - my_network
         restart: always

@@ -4,9 +4,17 @@
 ホーム
 @endsection
 
+@section('scripts')
+<script type="text/javascript" src="easygantt/easygantt.js"></script>
+<script type="text/javascript" src="easygantt/tasks.js"></script>
+
+<script type="text/javascript" src="{{asset('js/shift.js')}}" defer></script>
+@endsection
+
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
+<div id="shift" class="row justify-content-center">
+    <div class="col-md-12">
+        @if(!Auth::user()->flg_system_admin)
         <form class='form-inline mb-3' method=POST action="{{route('group_select')}}">
             @csrf
             <label for='group'>グループ選択</label>
@@ -17,6 +25,7 @@
             </select>
             <button class='btn btn-sm btn-info'>切替</button>
         </form>
+        @endif
 
         <div class="card">
             <div class="card-header">Dashboard</div>
@@ -29,7 +38,14 @@
                 @endif
 
                 You are logged in!
+                <div id="easygantt-vue">
+                    <easygantt-vue
+                    ></easygantt-vue>
+                </div>
+
             </div>
+        </div>
+        <div id="easygantt">
         </div>
     </div>
 </div>
