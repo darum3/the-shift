@@ -9,5 +9,4 @@ RUN docker-php-ext-install pdo_mysql gd zip
 
 WORKDIR /laravel
 
-ENTRYPOINT [ "vendor/phpunit/phpunit/phpunit"]
-# CMD ["list"]
+ENTRYPOINT [ "./phpunit.sh"]
