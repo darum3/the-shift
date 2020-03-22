@@ -38,14 +38,12 @@
                 @endif
 
                 You are logged in!
-                <div id="easygantt-vue">
-                    <easygantt-vue
-                    ></easygantt-vue>
-                </div>
 
             </div>
         </div>
-        <div id="easygantt">
+        <div id="easygantt-vue">
+            <easygantt-vue open_hhmm="0900" close_hhmm="2200"
+            ></easygantt-vue>
         </div>
     </div>
 </div>

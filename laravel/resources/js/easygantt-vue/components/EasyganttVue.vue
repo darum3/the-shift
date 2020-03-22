@@ -1,23 +1,24 @@
 <template>
 <div>
-    <div class='chart' v-for="(daylyTasks, i) in tasks" :key="i">
-        <!-- {{task}} -->
-        <span :id="'date' + i">日付</span>
+    <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
+        <span :id="'date' + i">{{dailyTasks.date}}</span>
         <div class='daily-area'>
             <div class='scale'>
                 <div class='hr'></div>
+                <section :style="'width:'+nameWidth+'px; border-left:1px solid; border-right:1px solid;'"></section>
                 <section v-for="time in timeScale" :style="'width:' + singleTimeScaleWidth + 'px;'" :key="time">
                     {{time}}
                 </section>
             </div>
             <ul :id="'task'+i" class="data">
-                <li v-for="(task, j) in daylyTasks" :key="j">
-                    <div :class="task.category">
+                <li v-for="(tasks, j) in dailyTasks.shift" :key="tasks.name">
+                    <div class='person_name'>{{tasks.name}}</div>
+                    <div v-for="(task, k) in tasks.task" :key="k" :class="task.category" class="person_shift">
                         <span class="bubble"
-                            :style="'margin-left:'+task.startTaskMin*widthAboutMin+'px; width:' + task.duration*widthAboutMin+'px;'">
+                            :style="'margin-left:'+(task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + task.duration*widthAboutMin+'px;'">
                         </span>
                         <span class='time'>{{getDisplayString(task.startTime)}}-{{getDisplayString(task.endTime)}}</span>
-                        <span class="bubble-span">{{task.name}}</span>
+                        <!-- <span class="bubble-span">{{task.name}}</span> -->
                     </div>
                 </li>
             </ul>
@@ -30,6 +31,16 @@
 import axios from 'axios'
 
 export default {
+    props: {
+        open_hhmm: {
+            required: true,
+            default: '0900',
+        },
+        close_hhmm: {
+            required: true,
+            default: '1800',
+        }
+    },
     data() {
         return {
             tasks: [],
@@ -41,14 +52,17 @@ export default {
             timeScale: [],
             singleTimeScaleWidth: 0,
             timeScaleWidth: 0,
+            widthAboutMin: 0, //1分毎の幅px
+
+            nameWidth: 50, //px
         }
     },
     created() {
         this.loadTasks()
 
         // 仮の初期化
-        this.open='0900'
-        this.close='1800'
+        this.open=this.open_hhmm
+        this.close=this.close_hhmm
 
         var openMin = this.convertTimesToMins(this.open);
         var closeMin = this.convertTimesToMins(this.close);
@@ -74,7 +88,7 @@ export default {
     },
     methods: {
         async loadTasks() {
-            var resp = await axios.get('./test/task.json')
+            var resp = await axios.get('./test/shift.json')
             this.tasks = resp.data
             this.clacTaskTimes()
             console.log(this.tasks)
@@ -82,17 +96,20 @@ export default {
         clacTaskTimes() {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
-                daily.forEach(task => {
-                    var startTimeMin = this.convertTimesToMins(task.startTime)
-                    task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
-                    task.duration = this.convertTimesToMins(task.endTime) - startTimeMin
+                daily.shift.forEach(person => {
+                    // console.log(person.task)
+                    person.task.forEach(task => {
+                        var startTimeMin = this.convertTimesToMins(task.startTime)
+                        task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
+                        task.duration = this.convertTimesToMins(task.endTime) - startTimeMin
+                    })
                 });
             });
         },
         resizeWindow() {
-            var clientWidth = document.getElementById('easygantt').clientWidth
-            this.singleTimeScaleWidth = clientWidth / (this.scaleDiv + 1) - 9
-            this.widthAboutMin = (this.singleTimeScaleWidth+1)/30
+            var chartWholeWidth = document.getElementById('easygantt-vue').clientWidth - this.nameWidth
+            this.singleTimeScaleWidth = chartWholeWidth / (this.scaleDiv + 1) - 1
+            this.widthAboutMin = (this.singleTimeScaleWidth)/30
         }
     },
 }
@@ -107,7 +124,7 @@ export default {
     span[id *= 'date'] {
         font-size: 14px;
         font-weight: 600;
-        // color: azure;
+        color: azure;
     }
 
     .daily-area {
@@ -150,41 +167,42 @@ export default {
         color: rgba(250,250,250,0.8);
 
         li{
-            line-height: 20px;
-            height: 25px;
+            line-height: 25px;
+            height: 30px;
             display: block;
             clear: both;
             position: relative;
             white-space: nowrap;
+            border-bottom: 1px solid;
         }
 
         // バブルの色：TODO
-        .dev {
+        .work_type_01 {
             span.bubble {
                 background-color: #2b8fef;
             }
         }
-        .lecture {
+        .work_type_02 {
             span.bubble {
                 background-color: #13d604;
             }
         }
-        .meeting {
+        .work_type_03 {
             span.bubble {
                 background-color: #ffe74d;
             }
         }
-        .event {
+        .work_type_04 {
             span.bubble {
                 background-color: #8470ff;
             }
         }
-        .absence {
+        .work_type_05 {
             span.bubble {
                 background-color: #ffc0cb;
             }
         }
-        .other {
+        .work_type_06 {
             span.bubble {
                 background-color: #a9a9a9;
             }
@@ -201,6 +219,14 @@ export default {
                 margin: 0 3px 0 0;
                 opacity: 0.7;
             }
+        }
+
+        div.person_name {
+            margin-left: 3px;
+        }
+        div.person_shift {
+            // display: inline-block;
+            margin-top: -20px;
         }
     }
 }
