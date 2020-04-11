@@ -5,8 +5,8 @@
 @endsection
 
 @section('scripts')
-<script type="text/javascript" src="easygantt/easygantt.js"></script>
-<script type="text/javascript" src="easygantt/tasks.js"></script>
+{{--  <script type="text/javascript" src="easygantt/easygantt.js"></script>  --}}
+{{--  <script type="text/javascript" src="easygantt/tasks.js"></script>  --}}
 
 <script type="text/javascript" src="{{asset('js/shift.js')}}" defer></script>
 @endsection
