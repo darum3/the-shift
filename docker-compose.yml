@@ -34,38 +34,22 @@ services:
             - ./laravel:/laravel
             - ./php.ini:/usr/local/etc/php/php.ini
         user: ${UID}
-    artisan:
-        build: 
-            context: ./
-            dockerfile: ./artisan/Dockerfile
-            args:
-                - PHP_VERSION
-        volumes:
-            - src:/laravel
-            - ./php.ini:/usr/local/etc/php/php.ini
-        depends_on:
-            - composer
-        user: "${UID}"
-        networks:
-            - my_network
-        environment:
-            - TZ=Asia/Tokyo
-    phpunit:
-        build:
-            context: ./
-            dockerfile: ./phpunit/Dockerfile
-            args:
-                - PHP_VERSION
-        volumes:
-            - src:/laravel
-            - ./php.ini:/usr/local/etc/php/php.ini
-        depends_on:
-            - composer
-        user: "${UID}"
-        networks:
-            - my_network
-        environment:
-            - TZ=Asia/Tokyo
+    # artisan:
+    #     build: 
+    #         context: ./
+    #         dockerfile: ./artisan/Dockerfile
+    #         args:
+    #             - PHP_VERSION
+    #     volumes:
+    #         - src:/laravel
+    #         - ./php.ini:/usr/local/etc/php/php.ini
+    #     depends_on:
+    #         - composer
+    #     user: "${UID}"
+    #     networks:
+    #         - my_network
+    #     environment:
+    #         - TZ=Asia/Tokyo
     laravel:
         build:
             context: ./
@@ -80,7 +64,6 @@ services:
             - TZ=Asia/Tokyo
         depends_on:
             - npm
-            - artisan
         networks:
             - my_network
         restart: always
