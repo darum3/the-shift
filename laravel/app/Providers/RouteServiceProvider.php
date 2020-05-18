@@ -68,12 +68,13 @@ class RouteServiceProvider extends ServiceProvider
             ->namespace($this->namespace.'\Admin')
             ->group(base_path('routes/web/admin.php'));
 
-        // グループ管理者（manage）
+        // グループ全体の管理者（manage：シフトを組む人の統括を想定）
         Route::prefix('manage')
             ->middleware(['web', 'auth', 'can:MNG'])
             ->namespace($this->namespace.'\Manage')
             ->group(base_path('routes/web/manage.php'));
 
+        // グループの管理者（シフトを組む人を想定）
         Route::prefix('g-manage')
             ->middleware(['web', 'auth', 'can:G-MNG'])
             ->namespace($this->namespace.'\GroupManage')
