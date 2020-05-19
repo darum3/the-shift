@@ -1,10 +1,9 @@
 @extends('layouts.g-manage')
 
 @section('page_title')
-ユーザ一覧
+ユーザ一覧【{{$group->name}}】
 @endsection
 
-@section('content')
 @section('content')
 @if(session('user.add.success'))
 <div class='alert alert-success'>

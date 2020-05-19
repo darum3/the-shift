@@ -51,7 +51,7 @@ class ShiftInsertTest extends TestCase
         return $this->actingAs($this->user)->withSession([
             'contract_id' => $this->contract->id,
             'group_id' => $this->group->id,
-        ])->json('POST', '/g-manage/shift/json/insert', $param);
+        ])->json('POST', '/g-manage/shift/json/', $param);
     }
 
     public function test新規1件休憩なし()

@@ -34,7 +34,10 @@ class HomeController extends Controller
         $group = Group::find($groupId);
         $this->authorize('view', $group);
 
-        session(['group_id' => $group->id]);
+        session([
+            'group_id' => $group->id,
+            'group_name' => $group->name,
+        ]);
         return redirect()->route('home');
     }
 }

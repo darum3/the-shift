@@ -1,5 +1,5 @@
 <template>
-<div>
+<div id="easygantt-area">
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
         <span :id="'date' + i">{{dailyTasks.date}}</span>
         <div class='daily-area'>
@@ -32,14 +32,22 @@ import axios from 'axios'
 
 export default {
     props: {
-        open_hhmm: {
+        openHhmm: {
             required: true,
             default: '0900',
         },
-        close_hhmm: {
+        closeHhmm: {
             required: true,
             default: '1800',
-        }
+        },
+        restApi: {
+            required: true,
+            type: String,
+        },
+        date: {
+            required: true,
+            type: String, // yyyy-mm-dd
+        },
     },
     data() {
         return {
@@ -61,8 +69,8 @@ export default {
         this.loadTasks()
 
         // 仮の初期化
-        this.open=this.open_hhmm
-        this.close=this.close_hhmm
+        this.open=this.openHhmm
+        this.close=this.closeHhmm
 
         var openMin = this.convertTimesToMins(this.open);
         var closeMin = this.convertTimesToMins(this.close);
@@ -78,6 +86,9 @@ export default {
             }
         }
 
+        // this.resizeWindow()
+    },
+    beforeUpdate() {
         this.resizeWindow()
     },
     mounted() {
@@ -88,12 +99,14 @@ export default {
     },
     methods: {
         async loadTasks() {
-            var resp = await axios.get('./test/shift.json')
+            var resp = await axios.get(this.restApi+'/'+this.date, {
+                headers: {'Content-Type': 'application/json'}
+            })
             this.tasks = resp.data
-            this.clacTaskTimes()
-            console.log(this.tasks)
+            this.calcTaskTimes()
+            console.log(this.tasks) // TODO DEBUG
         },
-        clacTaskTimes() {
+        calcTaskTimes() {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
                 daily.shift.forEach(person => {

@@ -119,4 +119,15 @@ class ShiftMaintenanceController extends Controller
         $ret['minute'] = intval(substr($hhmm, 2));
         return $ret;
     }
+
+    public function get(String $date)
+    {
+        if (strtotime($date) === FALSE) {
+            abort(400);
+        }
+
+        $shifts = Shift::whereGroupId(session('group_id'))->date($date)->with('group', 'work_type', 'off_hour')->get();
+
+        return compact('shifts');
+    }
 }

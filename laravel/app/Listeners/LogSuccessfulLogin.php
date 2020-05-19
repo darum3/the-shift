@@ -43,7 +43,11 @@ class LogSuccessfulLogin
 
         // 所属グループが1つの場合はグループIDをセットする
         if (Auth::user()->groups->count() == 1) {
-            session(['group_id' => Auth::user()->groups->first()->id]);
+            $group = Auth::user()->groups->first();
+            session([
+                'group_id' => $group->id,
+                'group_name' => $group->name,
+            ]);
         }
     }
 }

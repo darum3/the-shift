@@ -25,4 +25,9 @@ class Shift extends BaseModel
             ['start_datetime', '<', $date->startOfDay()->addDay()->hour(5)],
         ]);
     }
+
+    public function scopeAfter($query, CarbonImmutable $date)
+    {
+        return $query->where('start_datetime', '>=', $date->startOfDay()->hour(5));
+    }
 }
