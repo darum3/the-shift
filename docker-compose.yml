@@ -62,6 +62,7 @@ services:
             - ./php.ini:/usr/local/etc/php/php.ini
         environment: 
             - TZ=Asia/Tokyo
+            - XDG_CONFIG_HOME=/laravel
         depends_on:
             - npm
         networks:
