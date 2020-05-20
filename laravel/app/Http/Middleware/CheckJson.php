@@ -15,7 +15,7 @@ class CheckJson
      */
     public function handle($request, Closure $next)
     {
-        if (!$request->isJson()) {
+        if (count($request->all()) > 0 && !$request->isJson()) {
             abort(400, 'Json required.');
         }
 

@@ -34,8 +34,8 @@ export default {
         }
     },
     created() {
-        this.open = this.open_hhmm
-        this.close = this.close_hhmm
+        this.open = this.openHhmm
+        this.close = this.closeHhmm
     },
 }
 </script>

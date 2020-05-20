@@ -2,6 +2,7 @@
 
 namespace App\Eloquents;
 
+use App\User;
 use Carbon\CarbonImmutable;
 
 class Shift extends BaseModel
@@ -11,9 +12,24 @@ class Shift extends BaseModel
 
     ////
     // Relation
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function work_type()
     {
         return $this->belongsTo(WorkType::class);
+    }
+
+    public function off_hour()
+    {
+        return $this->belongsTo(OffHour::class);
     }
 
     ////

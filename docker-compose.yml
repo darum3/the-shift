@@ -67,6 +67,7 @@ services:
         networks:
             - my_network
         restart: always
+        user: ${UID}
     web:
         build:
             context: ./

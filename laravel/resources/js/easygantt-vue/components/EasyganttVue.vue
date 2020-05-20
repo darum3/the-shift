@@ -5,19 +5,19 @@
         <div class='daily-area'>
             <div class='scale'>
                 <div class='hr'></div>
-                <section :style="'width:'+nameWidth+'px; border-left:1px solid; border-right:1px solid;'"></section>
+                <section :style="'width:'+nameWidth+'px; border-left:1px solid; border-right:1px solid;'">&nbsp;</section>
                 <section v-for="time in timeScale" :style="'width:' + singleTimeScaleWidth + 'px;'" :key="time">
                     {{time}}
                 </section>
             </div>
             <ul :id="'task'+i" class="data">
-                <li v-for="(tasks, j) in dailyTasks.shift" :key="tasks.name">
-                    <div class='person_name'>{{tasks.name}}</div>
-                    <div v-for="(task, k) in tasks.task" :key="k" :class="task.category" class="person_shift">
+                <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
+                    <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
+                    <div :class="userShift.task.work_type" class="person_shift">
                         <span class="bubble"
-                            :style="'margin-left:'+(task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + task.duration*widthAboutMin+'px;'">
+                            :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'">
                         </span>
-                        <span class='time'>{{getDisplayString(task.startTime)}}-{{getDisplayString(task.endTime)}}</span>
+                        <span class='time'>{{getDisplayString(userShift.task.startTime)}}-{{getDisplayString(userShift.task.endTime)}}</span>
                         <!-- <span class="bubble-span">{{task.name}}</span> -->
                     </div>
                 </li>
@@ -75,7 +75,7 @@ export default {
         var openMin = this.convertTimesToMins(this.open);
         var closeMin = this.convertTimesToMins(this.close);
         var workingMin = closeMin - openMin;
-        // timeScale = [];
+
         this.scaleDiv =  workingMin / 30;
         for(let i=0; i <= this.scaleDiv; i++) {
             this.timeScale[i] = String((openMin + (i * 30))/60);
@@ -85,8 +85,6 @@ export default {
                 this.timeScale[i] = this.timeScale[i] + ":00";
             }
         }
-
-        // this.resizeWindow()
     },
     beforeUpdate() {
         this.resizeWindow()
@@ -104,18 +102,14 @@ export default {
             })
             this.tasks = resp.data
             this.calcTaskTimes()
-            console.log(this.tasks) // TODO DEBUG
         },
         calcTaskTimes() {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
-                daily.shift.forEach(person => {
-                    // console.log(person.task)
-                    person.task.forEach(task => {
-                        var startTimeMin = this.convertTimesToMins(task.startTime)
-                        task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
-                        task.duration = this.convertTimesToMins(task.endTime) - startTimeMin
-                    })
+                daily.shifts.forEach(person => {
+                    var startTimeMin = this.convertTimesToMins(person.task.startTime)
+                    person.task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
+                    person.task.duration = this.convertTimesToMins(person.task.endTime) - startTimeMin
                 });
             });
         },
@@ -223,10 +217,10 @@ export default {
 
         div:not(.milestone){
             .bubble {
-                height: 10px;
+                height: 20px;
                 display: block;
                 float: left;
-                position: relative;
+                // position: relative;
                 top: 7px;
                 border-radius: 4px;
                 margin: 0 3px 0 0;
@@ -235,7 +229,9 @@ export default {
         }
 
         div.person_name {
-            margin-left: 3px;
+            padding-left: 3px;
+            border-left: 1px solid;
+            border-right: 1px solid;
         }
         div.person_shift {
             // display: inline-block;
