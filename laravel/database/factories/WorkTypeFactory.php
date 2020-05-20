@@ -8,5 +8,6 @@ use Faker\Generator as Faker;
 $factory->define(WorkType::class, function (Faker $faker) {
     return [
         'name' => $faker->name,
+        'category' => $faker->randomAscii(),
     ];
 });
