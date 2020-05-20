@@ -47,6 +47,7 @@
                         <li class='nav-item'><a href="{{ route('manage.group') }}" class='nav-link'>グループ設定</a></li>
                         @elsecan('G-MNG')
                         <li class='nav-item'><a href="{{ route('g-manage.user')}}" class='nav-link'>ユーザ設定</a></li>
+                        <li class='nav-item'><a href="{{ route('g-manage.shift.view') }}"class='nav-link'>シフト作成</a></li>
                         @endcan
                     </ul>
 
@@ -73,6 +74,9 @@
                             @endcan
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    @can("G-MNG") {{-- グループ管理者はグループ表示 --}}
+                                    【{{ session('group_name') }}】
+                                    @endcan
                                     {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
 

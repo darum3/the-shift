@@ -119,4 +119,38 @@ class ShiftMaintenanceController extends Controller
         $ret['minute'] = intval(substr($hhmm, 2));
         return $ret;
     }
+
+    public function get(String $date)
+    {
+        if (strtotime($date) === FALSE) {
+            abort(400);
+        }
+
+        $carbon = CarbonImmutable::parse($date);
+        $shifts = Shift::whereGroupId(session('group_id'))->date($carbon)
+        ->with('user', 'work_type', 'off_hour')->get()
+        ->groupBy('user_id');
+        $respShifts = [];
+        foreach($shifts as $userShift) {
+            foreach($userShift as $shift) {
+                $respShifts[] = [
+                    "user_id" => $shift->user_id,
+                    "name" => $shift->user->name,
+                    "task" => [
+                        "task_id" => $shift->id,
+                        "startTime" => Carbon::parse($shift->start_datetime)->format('Hi'),
+                        "endTime" => Carbon::parse($shift->end_datetime)->format('Hi'),
+                        "work_type" => $shift->work_type->category,
+                    ],
+                ];
+            }
+        }
+
+        return [
+            [
+                'date' => $carbon->toDateString(),
+                'shifts' => $respShifts,
+            ],
+        ];
+    }
 }

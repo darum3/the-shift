@@ -31,7 +31,7 @@ services:
         build:
             context: ./
             dockerfile: ./mysql/Dockerfile
-        # user: "${UID}"
+        user: "${UID}"
         environment:
             - TZ=Asia/Tokyo
         volumes:

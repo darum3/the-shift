@@ -18,7 +18,10 @@ Route::group(['prefix' => 'user'], function() {
 });
 
 Route::group(['prefix' => 'shift'], function() {
+    Route::get('/', 'ShiftEditController@view')->name('g-manage.shift.view');
+
     Route::group(['prefix' => 'json', 'middleware' => 'json'], function() {
-        Route::post('/insert', 'ShiftMaintenanceController@insert')->name('g-manage.shift.json.insert');
+        Route::post('/', 'ShiftMaintenanceController@insert')->name('g-manage.shift.json.insert');
+        Route::get('/{date?}', 'ShiftMaintenanceController@get')->name('g-manage.shift.json.get');
     });
 });

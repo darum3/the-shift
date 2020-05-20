@@ -17,3 +17,5 @@ yarn-error.log
 /public/js/*.js
 /public/css/*.css
 /public/mix-manifest.json
+/public/coverage
+/psysh
