@@ -38,14 +38,14 @@ class ShiftMaintenanceController extends Controller
 
             foreach($request->all() as $i => $element) {
                 if(!isset($element["date"])) {
-                    abort(400, "Date field missing: Element #".$i+1);
+                    abort(400, sprintf("Date field missing: Element #%d", $i+1));
                 }
 
                 $date = new CarbonImmutable($element["date"]);
                 $presents = Shift::date($date)->whereGroupId($groupId)->get()->groupBy('user_id');
 
                 foreach($element["shift"] as $j => $shift) {
-                    $user_id = $shift['user_id'];
+                    $user_id = $shift['user_id'] ?? null;
                     if (!isset($user_id)) {
                         abort(400, 'user_id missing: '.$date->toDateString().' Element #'.($j + 1));
                     }
@@ -59,7 +59,7 @@ class ShiftMaintenanceController extends Controller
                     // validation
                     $workType = $workTypes->get($shift['work_type_code']);
                     if (is_null($workType)) {
-                        abort(400, 'work_type_code INVALID: '.$date->toDateString().' Element #'.($j+1));
+                        abort(400, sprintf("work_type_code INVALID: %s Element #%d", $date->toDateString(), $j+1));
                     }
 
                     // Insert
@@ -89,12 +89,12 @@ class ShiftMaintenanceController extends Controller
                             if ($offHour['startTime'] <= $shift['startTime']) {
                                 $startDate->addDay();
                             }
-                            $startDate->hour($start['hour'])->min($start['minute']);
+                            $startDate->hour($start['hour'])->minute($start['minute']);
                             $endDate = new Carbon($date);
                             if ($offHour['endTime'] <= $shift['startTime']) {
                                 $endDate->addDay();
                             }
-                            $endDate->hour($end['hour'])->min($end['minute']);
+                            $endDate->hour($end['hour'])->minute($end['minute']);
                             OffHour::create([
                                 'shift_id' => $newEntity->id,
                                 'off_start_datetime' => $startDate,
@@ -115,8 +115,8 @@ class ShiftMaintenanceController extends Controller
             return null;
         }
 
-        $ret['hour'] = intval(substr($hhmm, 0, 2));
-        $ret['minute'] = intval(substr($hhmm, 2));
+        $ret['hour'] = substr($hhmm, 0, 2);
+        $ret['minute'] = substr($hhmm, 2);
         return $ret;
     }
 

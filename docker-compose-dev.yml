@@ -17,7 +17,7 @@ services:
                 - PHP_VERSION
         volumes:
             - src:/laravel
-            - ./php.ini:/usr/local/etc/php/php.ini
+            - ./phpunit/php.ini:/usr/local/etc/php/php.ini
             - ./phpunit/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
         depends_on:
             - composer

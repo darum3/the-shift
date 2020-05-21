@@ -13,7 +13,6 @@ use App\Eloquents\Shift;
 use App\Eloquents\UserGroup;
 use App\Eloquents\WorkType;
 use Illuminate\Foundation\Testing\TestResponse;
-use PHPUnit\Framework\TestResult;
 
 class ShiftGetTest extends TestCase
 {

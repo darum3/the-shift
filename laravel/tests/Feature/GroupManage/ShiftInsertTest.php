@@ -58,7 +58,7 @@ class ShiftInsertTest extends TestCase
     {
         $this->callInterface([
             ["shift" => []],
-        ])->dump()->assertStatus(400);
+        ])->assertStatus(400);
     }
 
     public function testValidationNoUserId()
