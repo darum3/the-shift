@@ -17,8 +17,8 @@ jobs:
         ports: 
           - 3306
         options: --health-cmd "mysqladmin ping -h localhost" --health-interval 20s --health-timeout 10s --health-retries 10
-        volumes: 
-          - mysql/conf.d/:/etc/mysql/conf.d
+#         volumes: 
+#           - mysql/conf.d/:/etc/mysql/conf.d
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: tests 
