@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Change Directory
-      run: laravel/
+      run: cd laravel/
     - name: Directory
       run: pwd
     - name: Copy .env
