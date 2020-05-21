@@ -25,10 +25,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Change Directory
-      run: 
-    - name: Directory
-      run: pwd
     - name: Copy .env
 #       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
       run: cd laravel/ && php -r "copy('.env.actions', '.env');"
