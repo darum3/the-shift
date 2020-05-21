@@ -54,6 +54,46 @@ class ShiftInsertTest extends TestCase
         ])->json('POST', '/g-manage/shift/json/', $param);
     }
 
+    public function testValidationNoDate()
+    {
+        $this->callInterface([
+            ["shift" => []],
+        ])->assertStatus(400);
+    }
+
+    public function testValidationNoUserId()
+    {
+        $this->callInterface([
+            [
+                "date" => today()->toDateString(),
+                "shift" => [
+                    [
+                        "work_type_code" => $this->workType->code,
+                        "startTime" => "0900",
+                        "endTime" => "1800",
+                    ],
+                ],
+            ],
+        ])->assertStatus(400);
+    }
+
+    public function testValidationInvalidWorkType()
+    {
+        $this->callInterface([
+            [
+                "date" => today()->toDateString(),
+                "shift" => [
+                    [
+                        "user_id" => $this->workUsers[0]->id,
+                        "work_type_code" => "INVALID",
+                        "startTime" => "0900",
+                        "endTime" => "1800",
+                    ],
+                ],
+            ],
+        ])->assertStatus(400);
+    }
+
     public function test新規1件休憩なし()
     {
         $this->callInterface([
@@ -287,8 +327,8 @@ class ShiftInsertTest extends TestCase
                         "endTime" => "2000",
                         "off_hours" => [
                             [
-                                "startTime" => "1400",
-                                "endTime" => "1500",
+                                "startTime" => "1413",
+                                "endTime" => "1512",
                             ],
                         ],
                     ],
@@ -313,8 +353,8 @@ class ShiftInsertTest extends TestCase
         $this->assertEquals(today()->hour(20)->minute(0)->second(0)->toDateTimeString(), $entity->end_datetime);
 
         $offHour = OffHour::whereShiftId($entity->id)->first();
-        $this->assertEquals(today()->hour(14)->toDateTimeString(), $offHour->off_start_datetime);
-        $this->assertEquals(today()->hour(15)->toDateTimeString(), $offHour->off_end_datetime);
+        $this->assertEquals(today()->hour(14)->minute(13)->toDateTimeString(), $offHour->off_start_datetime);
+        $this->assertEquals(today()->hour(15)->minute(12)->toDateTimeString(), $offHour->off_end_datetime);
     }
 
     public function test更新1件()
@@ -391,4 +431,38 @@ class ShiftInsertTest extends TestCase
         $this->assertEquals(today()->hour(11)->minute(0)->second(0)->toDateTimeString(), $entity->start_datetime);
         $this->assertEquals(today()->hour(22)->minute(0)->second(0)->toDateTimeString(), $entity->end_datetime);
     }
+    public function test日跨ぎ正常()
+    {
+        $this->callInterface([
+            [
+                "date" => today()->toDateString(),
+                "shift" => [
+                    [
+                        "user_id" => $this->workUsers[0]->id,
+                        "work_type_code" => $this->workType->code,
+                        "startTime" => "2200",
+                        "endTime" => "0200",
+                        "off_hours" => [
+                            [
+                                "startTime" => "0045",
+                                "endTime" => "0100",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])->assertOk();
+
+        $collect = Shift::whereGroupId($this->group->id)->whereUserId($this->workUsers[0]->id)->with('work_type')->get();
+        $this->assertEquals(1, $collect->count());
+        $entity = $collect->first();
+        $this->assertEquals($this->workType->code, $entity->work_type->code);
+        $this->assertEquals(today()->hour(22)->minute(0)->second(0)->toDateTimeString(), $entity->start_datetime);
+        $this->assertEquals(today()->addDay()->hour(2)->minute(0)->second(0)->toDateTimeString(), $entity->end_datetime);
+
+        $offHour = OffHour::whereShiftId($entity->id)->first();
+        $this->assertEquals(today()->addDay()->hour(0)->minute(45)->toDateTimeString(), $offHour->off_start_datetime);
+        $this->assertEquals(today()->addDay()->hour(1)->toDateTimeString(), $offHour->off_end_datetime);
+    }
+
 }
