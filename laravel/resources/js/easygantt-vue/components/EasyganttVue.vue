@@ -21,6 +21,12 @@
                         <!-- <span class="bubble-span">{{task.name}}</span> -->
                     </div>
                 </li>
+                <li>
+                    <div :style="'width: ' +nameWidth+'px;'" class="person_add">＋</div> <!-- TODO 表示モードでは非表示 -->
+                    <div class="person_shift">
+                        &nbsp;
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
@@ -236,6 +242,11 @@ export default {
         div.person_shift {
             // display: inline-block;
             margin-top: -20px;
+        }
+        div.person_add {
+            border-left: 1px solid;
+            border-right: 1px solid;
+            text-align: center;
         }
     }
 }
