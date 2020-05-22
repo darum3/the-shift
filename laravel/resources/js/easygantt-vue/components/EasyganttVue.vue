@@ -1,7 +1,7 @@
 <template>
 <div id="easygantt-area">
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
-        <span :id="'date' + i">{{dailyTasks.date}}</span>
+        <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span><span v-if="isEdit" class="chart_header">：入力モード</span>
         <div class='daily-area'>
             <div class='scale'>
                 <div class='hr'></div>
@@ -13,7 +13,7 @@
             <ul :id="'task'+i" class="data">
                 <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
                     <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
-                    <div :class="userShift.task.work_type" class="person_shift">
+                    <div v-if="userShift.task != null" :class="userShift.task.work_type" class="person_shift">
                         <span class="bubble"
                             :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'">
                         </span>
@@ -22,7 +22,10 @@
                     </div>
                 </li>
                 <li>
-                    <div :style="'width: ' +nameWidth+'px;'" class="person_add">＋</div> <!-- TODO 表示モードでは非表示 -->
+                    <div :style="'width: ' +nameWidth+'px;'" class="person_add">
+                        <div v-if="isEdit"><button class="btn btn-light btn-sm" @click="addLine(dailyTasks.date)">＋</button></div>
+                        <div v-else>&nbsp;</div>
+                    </div>
                     <div class="person_shift">
                         &nbsp;
                     </div>
@@ -30,6 +33,12 @@
             </ul>
         </div>
     </div>
+    <user-select-dialog
+        :list-api="userListApi"
+        v-if="showUserSelect"
+        @close="showUserSelect = false"
+        @select="userSelect"
+    ></user-select-dialog>
 </div>
 </template>
 
@@ -54,6 +63,14 @@ export default {
             required: true,
             type: String, // yyyy-mm-dd
         },
+        edit: {
+            default: false,
+            type: Boolean,
+        },
+        userListApi: {
+            type: String,
+            required: true,
+        },
     },
     data() {
         return {
@@ -69,6 +86,11 @@ export default {
             widthAboutMin: 0, //1分毎の幅px
 
             nameWidth: 50, //px
+
+            isEdit: false,
+
+            showUserSelect: false,
+            userAddDate: null,
         }
     },
     created() {
@@ -91,6 +113,7 @@ export default {
                 this.timeScale[i] = this.timeScale[i] + ":00";
             }
         }
+        this.isEdit = this.edit
     },
     beforeUpdate() {
         this.resizeWindow()
@@ -113,9 +136,11 @@ export default {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
                 daily.shifts.forEach(person => {
-                    var startTimeMin = this.convertTimesToMins(person.task.startTime)
-                    person.task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
-                    person.task.duration = this.convertTimesToMins(person.task.endTime) - startTimeMin
+                    if(person.task != null) {
+                        var startTimeMin = this.convertTimesToMins(person.task.startTime)
+                        person.task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
+                        person.task.duration = this.convertTimesToMins(person.task.endTime) - startTimeMin
+                    }
                 });
             });
         },
@@ -123,6 +148,25 @@ export default {
             var chartWholeWidth = document.getElementById('easygantt-vue').clientWidth - this.nameWidth
             this.singleTimeScaleWidth = chartWholeWidth / (this.scaleDiv + 1) - 1
             this.widthAboutMin = (this.singleTimeScaleWidth)/30
+        },
+        addLine(date) {
+            this.showUserSelect = true
+            this.userAddDate = date
+        },
+        userSelect(user) {
+            if (this.userAddDate) {
+                // メンバー追加
+                this.tasks.forEach(daily => {
+                    if (daily.date == this.userAddDate) {
+                        daily.shifts.push({
+                            "user_id": user.id,
+                            "name": user.name,
+                        })
+                    }
+                })
+            }
+            this.showUserSelect = false
+            this.userAddDate = null
         }
     },
 }
@@ -134,7 +178,9 @@ export default {
     border-radius: 10px;
     padding: 10px;
 
-    span[id *= 'date'] {
+    // span[id *= 'date'] {
+    // }
+    span.chart_header {
         font-size: 14px;
         font-weight: 600;
         color: azure;
@@ -246,7 +292,13 @@ export default {
         div.person_add {
             border-left: 1px solid;
             border-right: 1px solid;
+            margin: 2px 0;
             text-align: center;
+
+            button {
+                padding: 0.2em 0.8em;
+                border-radius: 0.7em;
+            }
         }
     }
 }
