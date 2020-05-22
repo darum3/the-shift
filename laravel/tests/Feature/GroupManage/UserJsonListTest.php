@@ -34,13 +34,17 @@ class UserJsonListTest extends TestCase
             'code' => 'MAKE',
         ]);
 
-        $this->workUsers = factory(User::class, 2)->create();
-        foreach($this->workUsers as $worker) {
-            factory(UserGroup::class)->create([
-                'group_id' => $this->group->id,
-                'user_id' => $worker->id,
-            ]);
-        }
+        $this->workUsers[] = factory(User::class)->create();
+        factory(UserGroup::class)->create([
+            'group_id' => $this->group->id,
+            'user_id' => $this->workUsers[0]->id,
+        ]);
+        $this->workUsers[] = factory(User::class)->create();
+        $this->workUsers[] = factory(User::class)->create();
+        factory(UserGroup::class)->create([
+            'group_id' => $this->group->id,
+            'user_id' => $this->workUsers[2]->id,
+        ]);
     }
 
     private function callTargetInterface(array $param = []) : TestResponse
@@ -61,7 +65,7 @@ class UserJsonListTest extends TestCase
                 ], [
                     'id' => $this->workUsers[0]->id,
                 ], [
-                    'id' => $this->workUsers[1]->id,
+                    'id' => $this->workUsers[2]->id,
                 ],
             ],
         ], true)->assertJsonCount(3, 'users');
