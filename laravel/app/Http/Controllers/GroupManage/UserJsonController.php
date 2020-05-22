@@ -10,10 +10,10 @@ class UserJsonController extends Controller
 {
     public function list(Request $request)
     {
-        $group = Group::findOrFail(session('group_id'))->load('users');
+        $users = Group::findOrFail(session('group_id'))->users()->orderBy('users.name')->get();
 
-        $this->authorize('view', $group);
+        $this->authorize('view', $users->first()->pivot->pivotParent);
 
-        return ['users' => $group->users];
+        return ['users' => $users];
     }
 }

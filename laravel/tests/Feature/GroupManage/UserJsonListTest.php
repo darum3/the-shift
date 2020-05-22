@@ -57,17 +57,16 @@ class UserJsonListTest extends TestCase
 
     public function test取得できること()
     {
-        $this->callTargetInterface()->assertOk()
+        $response = $this->callTargetInterface();
+        $users = Group::find($this->group->id)->users()->orderBy('users.name')->get()->map(function($item, $key) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+            ];
+        })->all();
+        $response->assertOk()
         ->assertJson([
-            'users' => [
-                [
-                    'id' => $this->user->id,
-                ], [
-                    'id' => $this->workUsers[0]->id,
-                ], [
-                    'id' => $this->workUsers[2]->id,
-                ],
-            ],
+            'users' => $users
         ], true)->assertJsonCount(3, 'users');
     }
 }
