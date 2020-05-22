@@ -5,6 +5,7 @@ namespace App\Http\Controllers\GroupManage;
 use App\Eloquents\Shift;
 use App\Eloquents\ShiftFixedDate;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ShiftEditController extends Controller
@@ -23,6 +24,8 @@ class ShiftEditController extends Controller
                     break;
                 }
             }
+        } else {
+            $date = new Carbon($request->date);
         }
 
         return view('g-mng.shift.view', compact('date'));
