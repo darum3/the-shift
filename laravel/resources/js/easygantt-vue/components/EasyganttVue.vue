@@ -13,15 +13,21 @@
             <ul :id="'task'+i" class="data">
                 <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
                     <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
-                    <div v-if="userShift.task != null" :class="userShift.task.work_type" class="person_shift">
+                    <div v-if="Object.keys(userShift.task).length != 0" :class="userShift.task.work_type" class="person_shift"
+                        @mouseup="endShiftCreate(userShift, $event)" @mousemove="calcShiftCreate(userShift, $event)">
                         <span class="bubble"
                             :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'">
                         </span>
                         <span class='time'>{{getDisplayString(userShift.task.startTime)}}-{{getDisplayString(userShift.task.endTime)}}</span>
                         <!-- <span class="bubble-span">{{task.name}}</span> -->
                     </div>
+                    <div v-else-if="Object.keys(userShift.task).length == 0 && isEdit" class="person_shift" :class="{create_shift : userShift.in_drag}"
+                        @mousedown="startShiftCreate(userShift, $event)">
+                        &nbsp;
+                    </div>
                 </li>
                 <li>
+                    <!-- 最終の空行 -->
                     <div :style="'width: ' +nameWidth+'px;'" class="person_add">
                         <div v-if="isEdit"><button class="btn btn-light btn-sm" @click="addLine(dailyTasks.date)">＋</button></div>
                         <div v-else>&nbsp;</div>
@@ -91,6 +97,7 @@ export default {
 
             showUserSelect: false,
             userAddDate: null,
+            divPageX: null,
         }
     },
     created() {
@@ -136,13 +143,17 @@ export default {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
                 daily.shifts.forEach(person => {
+                    person.in_drag = false
                     if(person.task != null) {
-                        var startTimeMin = this.convertTimesToMins(person.task.startTime)
-                        person.task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
-                        person.task.duration = this.convertTimesToMins(person.task.endTime) - startTimeMin
+                        this.updateTaskMinute(person.task)
                     }
                 });
             });
+        },
+        updateTaskMinute(task) {
+            var startTimeMin = this.convertTimesToMins(task.startTime)
+            task.startTaskMin = startTimeMin - this.convertTimesToMins(this.open)
+            task.duration = this.convertTimesToMins(task.endTime) - startTimeMin
         },
         resizeWindow() {
             var chartWholeWidth = document.getElementById('easygantt-vue').clientWidth - this.nameWidth
@@ -150,6 +161,7 @@ export default {
             this.widthAboutMin = (this.singleTimeScaleWidth)/30
         },
         addLine(date) {
+            // '+'ボタンの制御
             this.showUserSelect = true
             this.userAddDate = date
         },
@@ -161,13 +173,58 @@ export default {
                         daily.shifts.push({
                             "user_id": user.id,
                             "name": user.name,
+                            "in_drag": false,
+                            "task": {}
                         })
                     }
                 })
             }
             this.showUserSelect = false
             this.userAddDate = null
-        }
+        },
+        startShiftCreate(shift, event) {
+            // クリックした
+            let startTaskMin = Math.round((event.offsetX - this.nameWidth - 1)/this.widthAboutMin) // 15分刻み
+            startTaskMin = Math.ceil(startTaskMin/15)*15
+            let startTimeMin = startTaskMin + this.convertTimesToMins(this.open)
+            let startTime = this.convertMinsToTimes(startTimeMin)
+
+            this.$set(shift.task, 'startTime', startTime)
+            this.$set(shift.task, 'endTime', startTime) // 初期は同じ数字
+            this.$set(shift.task, 'startTaskMin', startTaskMin)
+            this.$set(shift.task, 'duration', 0)
+            this.$set(shift.task, 'work_type', 'work_type_01') // TODO メモ
+
+            this.divPageX = window.pageXOffset + event.target.getBoundingClientRect().left
+            shift.in_drag=true
+        },
+        calcShiftCreate(shift, event) {
+            // 描画中
+            if (shift.in_drag) {
+                let x = event.pageX - this.divPageX
+                let endTaskMin = Math.round((x - this.nameWidth - 1)/this.widthAboutMin) // 15分刻み
+                endTaskMin = Math.ceil(endTaskMin/15)*15
+                let duration = endTaskMin - shift.task.startTaskMin
+                if (duration < 0) {
+                    // マイナスは設定できないように
+                    endTaskMin = shift.task.startTaskMin
+                    duration = 0
+                }
+                let endTimeMin = endTaskMin + this.convertTimesToMins(this.open)
+                let endTime = this.convertMinsToTimes(endTimeMin)
+
+                this.$set(shift.task, 'endTime', endTime)
+                this.$set(shift.task, 'duration', endTaskMin - shift.task.startTaskMin)
+            }
+        },
+        // 確定
+        endShiftCreate(shift, event) {
+            if (shift.task.duration == 0) {
+                this.$set(shift, 'task', {}) // 確定しない
+            }
+            this.divPageX = null
+            shift.in_drag=false
+        },
     },
 }
 </script>
@@ -299,6 +356,11 @@ export default {
                 padding: 0.2em 0.8em;
                 border-radius: 0.7em;
             }
+        }
+
+        // 編集モード
+        .create_shift {
+            cursor: text;
         }
     }
 }

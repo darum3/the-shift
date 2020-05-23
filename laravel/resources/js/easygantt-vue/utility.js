@@ -10,5 +10,12 @@ Vue.mixin({
         getDisplayString(time) {
             return String(time).slice(0, -2) + ':' + String(time).slice(-2)
         },
+        // 分数をhhmmフォーマットに戻す
+        convertMinsToTimes(timeMin) {
+            let hour = Math.floor(timeMin / 60)
+            let min = timeMin % 60
+            let time = ("00"+String(hour)).substr(-2) + ("00"+String(min)).substr(-2)
+            return time
+        }
     }
 })
