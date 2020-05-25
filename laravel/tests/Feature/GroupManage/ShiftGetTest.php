@@ -64,17 +64,20 @@ class ShiftGetTest extends TestCase
         ]);
         $this->callTargetInterface()->assertOk()
         ->assertJson([
-            [
-                "date" => today()->toDateString(),
-                "shifts" => [
-                    [
-                        "user_id" => $this->workUsers[0]->id,
-                        "name" => $this->workUsers[0]->name,
-                        "task" => [
-                            "task_id" => $shift->id,
-                            "startTime" => "0930",
-                            "endTime" => "1345",
-                            "work_type" => $this->workType->category,
+            "work_types" => WorkType::whereContractId($this->contract->id)->get()->keyBy('code')->toArray(),
+            "tasks" => [
+                [
+                    "date" => today()->toDateString(),
+                    "shifts" => [
+                        [
+                            "user_id" => $this->workUsers[0]->id,
+                            "name" => $this->workUsers[0]->name,
+                            "task" => [
+                                "task_id" => $shift->id,
+                                "startTime" => "0930",
+                                "endTime" => "1345",
+                                "work_type" => $this->workType->code,
+                            ],
                         ],
                     ],
                 ],

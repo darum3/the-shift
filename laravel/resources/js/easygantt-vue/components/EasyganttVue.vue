@@ -1,7 +1,11 @@
 <template>
 <div id="easygantt-area">
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
-        <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span><span v-if="isEdit" class="chart_header">：入力モード</span>
+        <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span>
+        <span v-if="isEdit" class="chart_header">：入力モード
+            <button class='btn btn-sm btn-light' style='margin-left: 1em;' @click="updateData" :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">更新</button>
+        </span>
+        <span v-if="inProgress" class='text-success blinking' style='font-size: 1.2em;'>更新中</span>
         <div class='daily-area'>
             <div class='scale'>
                 <div class='hr'></div>
@@ -13,7 +17,7 @@
             <ul :id="'task'+i" class="data">
                 <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
                     <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
-                    <div v-if="Object.keys(userShift.task).length != 0" :class="userShift.task.work_type" class="person_shift"
+                    <div v-if="Object.keys(userShift.task).length != 0" :class="work_types[userShift.task.work_type].category" class="person_shift"
                         @mouseup="endShiftCreate(userShift, $event)" @mousemove="calcShiftCreate(userShift, $event)">
                         <span class="bubble"
                             :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'">
@@ -81,6 +85,7 @@ export default {
     data() {
         return {
             tasks: [],
+            work_types: [],
 
             open: '', // hhmm
             close: '',
@@ -98,6 +103,8 @@ export default {
             showUserSelect: false,
             userAddDate: null,
             divPageX: null,
+
+            inProgress: false,
         }
     },
     created() {
@@ -136,7 +143,8 @@ export default {
             var resp = await axios.get(this.restApi+'/'+this.date, {
                 headers: {'Content-Type': 'application/json'}
             })
-            this.tasks = resp.data
+            this.work_types = resp.data.work_types
+            this.tasks = resp.data.tasks
             this.calcTaskTimes()
         },
         calcTaskTimes() {
@@ -193,7 +201,7 @@ export default {
             this.$set(shift.task, 'endTime', startTime) // 初期は同じ数字
             this.$set(shift.task, 'startTaskMin', startTaskMin)
             this.$set(shift.task, 'duration', 0)
-            this.$set(shift.task, 'work_type', 'work_type_01') // TODO メモ
+            this.$set(shift.task, 'work_type', 'MAKE') // TODO 選択する
 
             this.divPageX = window.pageXOffset + event.target.getBoundingClientRect().left
             shift.in_drag=true
@@ -225,6 +233,31 @@ export default {
             this.divPageX = null
             shift.in_drag=false
         },
+        async updateData() {
+            // 処理中へ
+            this.isEdit = false
+            this.inProgress = true
+
+            try {
+                var res = await axios.post(this.restApi,
+                [{
+                    'date': this.tasks[0].date,
+                    'shift': this.tasks[0].shifts.map(function(item) {
+                        return {
+                            'user_id': item.user_id,
+                            'work_type_code': item.task.work_type,
+                            'startTime': item.task.startTime,
+                            'endTime': item.task.endTime,
+                        }
+                    })
+                }])
+            }catch(e) {
+                console.error(e)
+            }
+
+            this.inProgress = false
+            this.isEdit = true
+        }
     },
 }
 </script>
