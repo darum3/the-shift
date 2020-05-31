@@ -7,16 +7,16 @@
         </span>
         <span v-if="inProgress" class='text-success blinking' style='font-size: 1.2em;'>更新中</span>
         <div class='daily-area'>
-            <div class='scale'>
-                <div class='hr'></div>
-                <section :style="'width:'+nameWidth+'px; border-left:1px solid; border-right:1px solid;'">&nbsp;</section>
-                <section v-for="time in timeScale" :style="'width:' + singleTimeScaleWidth + 'px;'" :key="time">
-                    {{time}}
-                </section>
-            </div>
+            <easygantt-time-scale
+                :name-width="nameWidth" :single-time-scale-width="singleTimeScaleWidth"
+                :open="openHhmm" :close="closeHhmm"
+                @delete="deleteConfirm()"
+            ></easygantt-time-scale>
             <ul :id="'task'+i" class="data">
-                <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
-                    <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
+                <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.task.task_id"
+                    :class="{'user-select' : userShift.in_select}">
+                    <div :style="'width: '+nameWidth+'px;'" class='person_name'
+                        @click="onClickName(userShift)">{{userShift.name}}</div>
                     <div v-if="Object.keys(userShift.task).length != 0" :class="work_types[userShift.task.work_type].category" class="person_shift"
                         @mouseup="endShiftCreate(userShift, $event)" @mousemove="shiftMouseMove(userShift, $event)">
                         <span class="bubble" id='shift_bubble'
@@ -42,6 +42,7 @@
                         &nbsp;
                     </div>
                 </li>
+                <div class='hr'></div>
             </ul>
         </div>
     </div>
@@ -51,6 +52,12 @@
         @close="showUserSelect = false"
         @select="userSelect"
     ></user-select-dialog>
+    <ok-cancel-dialog
+        v-if="showDeleteDialog"
+        :message="deleteMsg"
+        @ok="deleteExec()"
+        @cancel="showDeleteDialog = false"
+    ></ok-cancel-dialog>
 </div>
 </template>
 
@@ -105,6 +112,8 @@ export default {
             showUserSelect: false,
             userAddDate: null,
             divPageX: null,
+            showDeleteDialog: false,
+            deleteMsg: '削除しますか？',
 
             moveStart: null,
 
@@ -123,14 +132,6 @@ export default {
         var workingMin = closeMin - openMin;
 
         this.scaleDiv =  workingMin / 30;
-        for(let i=0; i <= this.scaleDiv; i++) {
-            this.timeScale[i] = String((openMin + (i * 30))/60);
-            if(this.timeScale[i].slice(-2) === ".5") {
-                this.timeScale[i] = this.timeScale[i].replace(".5", ":30");
-            } else {
-                this.timeScale[i] = this.timeScale[i] + ":00";
-            }
-        }
         this.isEdit = this.edit
     },
     beforeUpdate() {
@@ -155,9 +156,10 @@ export default {
             // 開始位置とタスクの長さ（px）を計算し、this.tasks を更新
             this.tasks.forEach(daily => {
                 daily.shifts.forEach(person => {
-                    person.in_drag = false
-                    person.resize_startTime = false
-                    person.resize_endTime = false
+                    this.$set(person, 'in_drag', false)
+                    this.$set(person, 'resize_startTime', false)
+                    this.$set(person, 'in_select', false)
+                    this.$set(person, 'resize_endTime', false)
                     if(person.task != null) {
                         this.updateTaskMinute(person.task)
                     }
@@ -190,8 +192,10 @@ export default {
                             "in_drag": false,
                             "resize_startTime": false,
                             "resize_endTime": false,
+                            "in_select": false,
                             "task": {},
                         })
+                        daily.shifts.splice(daily.shifts.length)
                     }
                 })
             }
@@ -338,6 +342,21 @@ export default {
             }
             shift.in_drag = false
         },
+        onClickName(shift) {
+            shift.in_select = !shift.in_select
+            this.$upda
+        },
+        // 削除
+        deleteConfirm() {
+            this.showDeleteDialog = true
+        },
+        deleteExec() {
+            this.tasks.forEach(daily => {
+                daily.shifts = daily.shifts.filter(s => s.in_select == false)
+                daily.shifts.splice(daily.shifts.length)
+            })
+            this.showDeleteDialog = false
+        },
         async updateData() {
             // 処理中へ
             this.isEdit = false
@@ -387,13 +406,15 @@ export default {
     }
 
     .hr {
-        border-top: 1px solid rgba(250, 250, 250, 0.5);
+        border-top: 1px solid rgba(250, 250, 250, 0.8);
     }
 
     .scale {
         height: 100%;
         width: 100%;
         position: absolute;
+        border-top: rgb(250, 250, 250) 1px solid;
+        border-bottom: rgb(250, 250, 250) 1px solid;
 
         section {
             float: left;
@@ -407,6 +428,10 @@ export default {
             height: 100%;
             white-space: nowrap;
         }
+        section.person_name {
+            border-left:1px solid #333; // 線出さない
+            border-right:1px solid rgb(250, 250, 250);
+        }
         .bubble {
             float: left;
             display: block;
@@ -419,6 +444,7 @@ export default {
         text-align: left;
         list-style-type: none;
         color: rgba(250,250,250,0.8);
+        // border-top: 1px solid rgba(250, 250, 250, 0.8);
 
         li{
             line-height: 30px;
@@ -427,7 +453,12 @@ export default {
             clear: both;
             position: relative;
             white-space: nowrap;
-            border-bottom: 1px solid;
+            // border-bottom: 1px solid;
+            border-top: 1px solid rgba(250, 250, 250, 0.8);
+
+            &.user-select {
+                background-color: rgba(255, 182, 193, 0.5);
+            }
         }
 
         // バブルの色：TODO
@@ -477,16 +508,13 @@ export default {
 
         div.person_name {
             padding-left: 3px;
-            border-left: 1px solid;
-            border-right: 1px solid;
+            cursor: pointer;
         }
         div.person_shift {
             // display: inline-block;
             margin-top: -22px;
         }
         div.person_add {
-            border-left: 1px solid;
-            border-right: 1px solid;
             margin: 2px 0;
             text-align: center;
 
@@ -501,5 +529,11 @@ export default {
             cursor: text;
         }
     }
+}
+.person_delete {
+    background-image: url('../../../img/delete.png');
+    background-size: 25px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 </style>
