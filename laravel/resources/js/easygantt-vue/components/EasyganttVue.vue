@@ -3,7 +3,7 @@
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
         <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span>
         <span v-if="isEdit" class="chart_header">：入力モード
-            <button class='btn btn-sm btn-light' style='margin-left: 1em;' @click="updateData" :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">更新</button>
+            <button class='btn btn-sm btn-light' style='margin-left: 1em;' @click="updateData" :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">保存</button>
         </span>
         <span v-if="inProgress" class='text-success blinking' style='font-size: 1.2em;'>更新中</span>
         <div class='daily-area'>
@@ -18,14 +18,16 @@
                 <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.user_id">
                     <div :style="'width: '+nameWidth+'px;'" class='person_name'>{{userShift.name}}</div>
                     <div v-if="Object.keys(userShift.task).length != 0" :class="work_types[userShift.task.work_type].category" class="person_shift"
-                        @mouseup="endShiftCreate(userShift, $event)" @mousemove="calcShiftCreate(userShift, $event)">
-                        <span class="bubble"
-                            :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'">
+                        @mouseup="endShiftCreate(userShift, $event)" @mousemove="shiftMouseMove(userShift, $event)">
+                        <span class="bubble" id='shift_bubble'
+                            :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'"
+                            :class="{'ew-resizable' : userShift.resize_startTime === true || userShift.resize_endTime === true, movable : isEdit, moving : userShift.in_drag=='time_change'}"
+                            @mousedown="onMousedownBubble(userShift, $event)" @mouseup="endShiftCreate(userShift, $event)">
                         </span>
                         <span class='time'>{{getDisplayString(userShift.task.startTime)}}-{{getDisplayString(userShift.task.endTime)}}</span>
                         <!-- <span class="bubble-span">{{task.name}}</span> -->
                     </div>
-                    <div v-else-if="Object.keys(userShift.task).length == 0 && isEdit" class="person_shift" :class="{create_shift : userShift.in_drag}"
+                    <div v-else-if="Object.keys(userShift.task).length == 0 && isEdit" class="person_shift" :class="{create_shift : userShift.in_drag === 'create'}"
                         @mousedown="startShiftCreate(userShift, $event)">
                         &nbsp;
                     </div>
@@ -104,6 +106,8 @@ export default {
             userAddDate: null,
             divPageX: null,
 
+            moveStart: null,
+
             inProgress: false,
         }
     },
@@ -152,6 +156,8 @@ export default {
             this.tasks.forEach(daily => {
                 daily.shifts.forEach(person => {
                     person.in_drag = false
+                    person.resize_startTime = false
+                    person.resize_endTime = false
                     if(person.task != null) {
                         this.updateTaskMinute(person.task)
                     }
@@ -182,7 +188,9 @@ export default {
                             "user_id": user.id,
                             "name": user.name,
                             "in_drag": false,
-                            "task": {}
+                            "resize_startTime": false,
+                            "resize_endTime": false,
+                            "task": {},
                         })
                     }
                 })
@@ -190,8 +198,21 @@ export default {
             this.showUserSelect = false
             this.userAddDate = null
         },
+        /**
+         * シフトのbubbleをマウスダウン（D&D開始）
+         */
+        onMousedownBubble(shift, event) {
+            this.moveStart = event.pageX
+            if (shift.resize_startTime === true) {
+                shift.in_drag = 'start_change'
+            } else if (shift.resize_endTime === true) {
+                shift.in_drag = 'end_change'
+            } else {
+                shift.in_drag = 'time_change'
+            }
+        },
+        // クリックした
         startShiftCreate(shift, event) {
-            // クリックした
             let startTaskMin = Math.round((event.offsetX - this.nameWidth - 1)/this.widthAboutMin) // 15分刻み
             startTaskMin = Math.ceil(startTaskMin/15)*15
             let startTimeMin = startTaskMin + this.convertTimesToMins(this.open)
@@ -204,34 +225,118 @@ export default {
             this.$set(shift.task, 'work_type', 'MAKE') // TODO 選択する
 
             this.divPageX = window.pageXOffset + event.target.getBoundingClientRect().left
-            shift.in_drag=true
+            shift.in_drag = 'create'
         },
-        calcShiftCreate(shift, event) {
-            // 描画中
-            if (shift.in_drag) {
-                let x = event.pageX - this.divPageX
-                let endTaskMin = Math.round((x - this.nameWidth - 1)/this.widthAboutMin) // 15分刻み
-                endTaskMin = Math.ceil(endTaskMin/15)*15
-                let duration = endTaskMin - shift.task.startTaskMin
-                if (duration < 0) {
-                    // マイナスは設定できないように
-                    endTaskMin = shift.task.startTaskMin
-                    duration = 0
+        /**
+         * シフト上でマウスを動かした(D&D)
+         */
+        shiftMouseMove(shift, event) {
+            if (event.target.id == 'shift_bubble') {
+                let inResizePix = this.widthAboutMin * 15 // カーソルを変えるpix
+                // スケールのためのcursor変更
+                let clientRect = event.target.getBoundingClientRect()
+                if (Math.abs(event.x - clientRect.left) < inResizePix) {
+                    // 15分以内ならカーソル変更
+                    this.$set(shift, 'resize_startTime', true)
+                    return
+                } else if (Math.abs(event.x - clientRect.right) < inResizePix) {
+                    this.$set(shift, 'resize_endTime', true)
+                    return
                 }
-                let endTimeMin = endTaskMin + this.convertTimesToMins(this.open)
+            }
+            if (shift.resize_startTime == true && shift.in_drag !== 'start_change') {
+                // 開始中でなければフラグを戻す
+                this.$set(shift, 'resize_startTime', false)
+            } else if (shift.resize_endTime === true && shift.in_drag !== 'end_change') {
+                this.$set(shift, 'resize_endTime', false)
+            }
+            if (shift.in_drag === false) return; // D&D中でなければ何もしない
+
+            if (shift.in_drag == 'create') {
+                this.calcShiftCreate(shift, event) // 新規描画（作成）中
+            } else if(shift.in_drag == 'time_change') {
+                this.calcShiftChange(shift, event) // 時間変更（D&D)
+            } else if(shift.in_drag == 'start_change') {
+                this.calcStartChange(shift, event)
+            } else if (shift.in_drag == 'end_change') {
+                this.calcEndChange(shift, event)
+            }
+        },
+        // 描画中
+        calcShiftCreate(shift, event) {
+            let x = event.pageX - this.divPageX
+            let endTaskMin = Math.round((x - this.nameWidth - 1)/this.widthAboutMin) // 15分刻み
+            endTaskMin = Math.ceil(endTaskMin/15)*15
+            let duration = endTaskMin - shift.task.startTaskMin
+            if (duration < 0) {
+                // マイナスは設定できないように
+                endTaskMin = shift.task.startTaskMin
+                duration = 0
+            }
+            let endTimeMin = endTaskMin + this.convertTimesToMins(this.open)
+            let endTime = this.convertMinsToTimes(endTimeMin)
+
+            this.$set(shift.task, 'endTime', endTime)
+            this.$set(shift.task, 'duration', endTaskMin - shift.task.startTaskMin)
+        },
+        // 時間の変更
+        calcShiftChange(shift, event) {
+            let moveTimeMin = this.calcMoveTime(event)
+            let newStartMin = shift.task.startTaskMin + moveTimeMin
+            if (moveTimeMin != 0 && newStartMin >= 0) {
+                let startTimeMin = newStartMin + this.convertTimesToMins(this.open)
+                let startTime = this.convertMinsToTimes(startTimeMin)
+                let endTimeMin = startTimeMin + shift.task.duration
                 let endTime = this.convertMinsToTimes(endTimeMin)
 
-                this.$set(shift.task, 'endTime', endTime)
-                this.$set(shift.task, 'duration', endTaskMin - shift.task.startTaskMin)
+                if (endTime <= this.closeHhmm) {
+                    this.$set(shift.task, 'startTime', startTime)
+                    this.$set(shift.task, 'endTime', endTime)
+                    this.$set(shift.task, 'startTaskMin', newStartMin)
+
+                    this.moveStart = event.pageX
+                }
             }
+        },
+        // 開始時間の変更
+        calcStartChange(shift, event) {
+            let moveTimeMin = this.calcMoveTime(event)
+            let newStartMin = shift.task.startTaskMin + moveTimeMin
+            if (moveTimeMin != 0 && newStartMin >= 0) {
+                let startTimeMin = newStartMin + this.convertTimesToMins(this.open)
+                let startTime = this.convertMinsToTimes(startTimeMin)
+                this.$set(shift.task, 'startTime', startTime)
+                this.updateTaskMinute(shift.task)
+
+                this.moveStart = event.pageX
+            }
+        },
+        // 終了時間の変更
+        calcEndChange(shift, event) {
+            let moveTimeMin = this.calcMoveTime(event)
+            let newEndMin = (shift.task.startTaskMin + shift.task.duration) + moveTimeMin
+            let endTime = this.convertMinsToTimes(newEndMin + this.convertTimesToMins(this.open))
+            if (moveTimeMin != 0 && endTime <= this.closeHhmm) {
+                this.$set(shift.task, 'endTime', endTime)
+                this.updateTaskMinute(shift.task)
+
+                this.moveStart = event.pageX
+            }
+        },
+        // 移動時間の計算
+        calcMoveTime(event) {
+            let delta = event.pageX - this.moveStart
+            return Math.round(Math.round(delta/this.widthAboutMin)/15) * 15
         },
         // 確定
         endShiftCreate(shift, event) {
-            if (shift.task.duration == 0) {
-                this.$set(shift, 'task', {}) // 確定しない
+            if (shift.in_drag == 'create') {
+                if (shift.task.duration == 0) {
+                    this.$set(shift, 'task', {}) // 確定しない
+                }
+                this.divPageX = null
             }
-            this.divPageX = null
-            shift.in_drag=false
+            shift.in_drag = false
         },
         async updateData() {
             // 処理中へ
@@ -316,8 +421,8 @@ export default {
         color: rgba(250,250,250,0.8);
 
         li{
-            line-height: 25px;
-            height: 30px;
+            line-height: 30px;
+            height: 40px;
             display: block;
             clear: both;
             position: relative;
@@ -377,7 +482,7 @@ export default {
         }
         div.person_shift {
             // display: inline-block;
-            margin-top: -20px;
+            margin-top: -22px;
         }
         div.person_add {
             border-left: 1px solid;

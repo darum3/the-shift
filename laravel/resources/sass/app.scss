@@ -10,6 +10,15 @@
 .clickable {
     cursor: pointer;
 }
+.movable {
+    cursor: pointer;
+}
+.moving {
+    cursor: default;
+}
+.ew-resizable {
+    cursor: ew-resize;
+}
 
 /* 点滅 */
 // https://www.will-hp.com/wpblog/web/72/
