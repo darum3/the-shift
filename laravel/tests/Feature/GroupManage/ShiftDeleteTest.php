@@ -64,7 +64,7 @@ class ShiftDeleteTest extends TestCase
     public function testValidationTaskIdNotExists()
     {
         $this->callInterface([
-            'task_id' => [1],
+            'task_id' => [0],
         ])->assertStatus(422);
 
         $this->callInterface([
