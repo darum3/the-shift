@@ -5,16 +5,15 @@ namespace Tests\Feature\GroupManage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-
 use App\User;
 use App\Eloquents\Contract;
 use App\Eloquents\Group;
-use App\Eloquents\Shift;
+use App\Eloquents\ShiftFixedDate;
 use App\Eloquents\UserGroup;
 use App\Eloquents\WorkType;
 use Illuminate\Foundation\Testing\TestResponse;
 
-class ShiftGetTest extends TestCase
+class ShiftViewTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -50,38 +49,37 @@ class ShiftGetTest extends TestCase
         return $this->ActingAs($this->user)->withSession([
             'contract_id' => $this->contract->id,
             'group_id' => $this->group->id,
-        ])->json('GET', '/g-manage/shift/json/'.today()->toDateString(), $param);
+        ])->call('GET', '/g-manage/shift/', $param);
     }
 
-    public function test取得できること()
+    public function test日付指定なし()
     {
-        $shift = factory(Shift::class)->create([
+        $response = $this->callTargetInterface();
+
+        $response->assertOk()->assertViewIs('g-mng.shift.view')->assertViewHas('date', today()->tomorrow());
+    }
+
+    public function test日付指定なしデータあり()
+    {
+        factory(ShiftFixedDate::class)->create([
             'group_id' => $this->group->id,
-            'user_id' => $this->workUsers[0]->id,
-            'work_type_id' => $this->workType->id,
-            'start_datetime' => today()->hour(9)->minute(30),
-            'end_datetime' => today()->hour(13)->minute(45),
+            'date_fixed' => today()->tomorrow(),
         ]);
-        $this->callTargetInterface()->assertOk()
-        ->assertJson([
-            "work_types" => WorkType::whereContractId($this->contract->id)->get()->keyBy('code')->toArray(),
-            "tasks" => [
-                [
-                    "date" => today()->toDateString(),
-                    "shifts" => [
-                        [
-                            "user_id" => $this->workUsers[0]->id,
-                            "name" => $this->workUsers[0]->name,
-                            "task" => [
-                                "task_id" => $shift->id,
-                                "startTime" => "0930",
-                                "endTime" => "1345",
-                                "work_type" => $this->workType->code,
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ], true);
+
+        $response = $this->callTargetInterface();
+        $response->assertOk()->assertViewIs('g-mng.shift.view')->assertViewHas('date', today()->addDays(2));
+
+    }
+
+    public function test日付指定ありデータあり()
+    {
+        factory(ShiftFixedDate::class)->create([
+            'group_id' => $this->group->id,
+            'date_fixed' => today()->tomorrow(),
+        ]);
+
+        $response = $this->callTargetInterface(['date' => today()->tomorrow()->toDateString()]);
+        $response->assertOk()->assertViewIs('g-mng.shift.view')->assertViewHas('date', today()->addDays(1));
+
     }
 }

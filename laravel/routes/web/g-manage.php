@@ -15,6 +15,10 @@ Route::group(['prefix' => 'user'], function() {
         Route::get('/confirm', 'UserController@delConfirm');
         Route::post('/exec', 'UserController@delExec')->name('g-manage.user.del.exec');
     });
+
+    Route::group(['prefix' => 'json', 'middleware' => 'json'], function() {
+        Route::get('/', 'UserJsonController@list')->name('g-manage.user.json.list');
+    });
 });
 
 Route::group(['prefix' => 'shift'], function() {

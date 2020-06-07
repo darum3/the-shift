@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\GroupManage;
+namespace Tests\Feature\GroupManage\User;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -9,12 +9,11 @@ use Tests\TestCase;
 use App\User;
 use App\Eloquents\Contract;
 use App\Eloquents\Group;
-use App\Eloquents\Shift;
 use App\Eloquents\UserGroup;
 use App\Eloquents\WorkType;
 use Illuminate\Foundation\Testing\TestResponse;
 
-class ShiftGetTest extends TestCase
+class IndexTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -50,38 +49,30 @@ class ShiftGetTest extends TestCase
         return $this->ActingAs($this->user)->withSession([
             'contract_id' => $this->contract->id,
             'group_id' => $this->group->id,
-        ])->json('GET', '/g-manage/shift/json/'.today()->toDateString(), $param);
+        ])->call('GET', '/g-manage/user/', $param);
     }
 
-    public function test取得できること()
+    public function test検索条件なし()
     {
-        $shift = factory(Shift::class)->create([
-            'group_id' => $this->group->id,
-            'user_id' => $this->workUsers[0]->id,
-            'work_type_id' => $this->workType->id,
-            'start_datetime' => today()->hour(9)->minute(30),
-            'end_datetime' => today()->hour(13)->minute(45),
-        ]);
         $this->callTargetInterface()->assertOk()
-        ->assertJson([
-            "work_types" => WorkType::whereContractId($this->contract->id)->get()->keyBy('code')->toArray(),
-            "tasks" => [
-                [
-                    "date" => today()->toDateString(),
-                    "shifts" => [
-                        [
-                            "user_id" => $this->workUsers[0]->id,
-                            "name" => $this->workUsers[0]->name,
-                            "task" => [
-                                "task_id" => $shift->id,
-                                "startTime" => "0930",
-                                "endTime" => "1345",
-                                "work_type" => $this->workType->code,
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ], true);
+        ->assertViewIs('g-mng.user.list')
+        ->assertViewHasAll([
+            'group' => Group::findOrFail($this->group->id)->load('users'),
+            'search' => null,
+        ]);
+    }
+
+    public function testメールアドレス検索()
+    {
+        $this->callTargetInterface(['search' => $this->user->email])->assertOk()
+        ->assertViewIs('g-mng.user.list')
+        ->assertSeeText($this->user->email);
+    }
+
+    public function test名前検索()
+    {
+        $this->callTargetInterface(['search' => $this->user->name])->assertOk()
+        ->assertViewIs('g-mng.user.list')
+        ->assertSeeText($this->user->email);
     }
 }

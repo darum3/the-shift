@@ -12,7 +12,9 @@
 <div id="shift">
     <easygantt-vue-ctrl
         rest-api="{{route('g-manage.shift.json.get')}}"
+        user-list-api="{{ route('g-manage.user.json.list') }}"
         date="{{$date->toDateString()}}"
+        edit
     ></easygantt-vue-ctrl>
 </div>
 @endsection

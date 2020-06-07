@@ -41,10 +41,6 @@
 
             </div>
         </div>
-        <div id="easygantt-vue">
-            <easygantt-vue open_hhmm="0900" close_hhmm="2200"
-            ></easygantt-vue>
-        </div>
     </div>
 </div>
 @endsection

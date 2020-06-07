@@ -141,16 +141,19 @@ class ShiftMaintenanceController extends Controller
                         "task_id" => $shift->id,
                         "startTime" => Carbon::parse($shift->start_datetime)->format('Hi'),
                         "endTime" => Carbon::parse($shift->end_datetime)->format('Hi'),
-                        "work_type" => $shift->work_type->category,
+                        "work_type" => $shift->work_type->code,
                     ],
                 ];
             }
         }
 
         return [
-            [
-                'date' => $carbon->toDateString(),
-                'shifts' => $respShifts,
+            "work_types" => WorkType::whereContractId(session('contract_id'))->get()->keyBy('code'),
+            "tasks" => [
+                [
+                    'date' => $carbon->toDateString(),
+                    'shifts' => $respShifts,
+                ],
             ],
         ];
     }

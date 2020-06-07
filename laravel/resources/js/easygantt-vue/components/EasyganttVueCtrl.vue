@@ -2,7 +2,9 @@
     <div id="easygantt-vue">
         <easygantt-vue :open-hhmm="open" :close-hhmm="close"
             :rest-api="restApi"
+            :user-list-api="userListApi"
             :date="date"
+            :edit="edit"
         ></easygantt-vue>
     </div>
 </template>
@@ -23,6 +25,14 @@ export default {
             type: String,
         },
         date: {
+            type: String,
+            required: true,
+        },
+        edit: {
+            type: Boolean,
+            default: true,
+        },
+        userListApi: {
             type: String,
             required: true,
         },
