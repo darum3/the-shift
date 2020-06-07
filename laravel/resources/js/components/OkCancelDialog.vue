@@ -1,5 +1,5 @@
 <template>
-    <modal>
+    <modal :width="width">
         <h3 slot='header'>確認</h3>
         <div slot="body">{{message}}</div>
         <div slot='footer'>
@@ -13,6 +13,8 @@
 export default {
     props: {
         message: String,
+
+        width: String,
     },
 }
 </script>

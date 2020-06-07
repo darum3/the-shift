@@ -52,7 +52,7 @@
         @close="showUserSelect = false"
         @select="userSelect"
     ></user-select-dialog>
-    <ok-cancel-dialog
+    <ok-cancel-dialog width="80%"
         v-if="showDeleteDialog"
         :message="deleteMsg"
         @ok="deleteExec()"
@@ -95,6 +95,7 @@ export default {
         return {
             tasks: [],
             work_types: [],
+            delete_ids: [],
 
             open: '', // hhmm
             close: '',
@@ -350,8 +351,10 @@ export default {
         deleteConfirm() {
             this.showDeleteDialog = true
         },
+        // 削除実行
         deleteExec() {
             this.tasks.forEach(daily => {
+                Array.prototype.push.apply(this.delete_ids, daily.shifts.filter(s => s.in_select && s.task.task_id != null).map(s => s.task.task_id))
                 daily.shifts = daily.shifts.filter(s => s.in_select == false)
                 daily.shifts.splice(daily.shifts.length)
             })
@@ -363,6 +366,12 @@ export default {
             this.inProgress = true
 
             try {
+                if (this.delete_ids.length !== 0) {
+                    await axios.delete(this.restApi,
+                        {data: {'task_id': this.delete_ids}})
+                    this.delete_ids = []
+                }
+
                 var res = await axios.post(this.restApi,
                 [{
                     'date': this.tasks[0].date,
@@ -375,12 +384,14 @@ export default {
                         }
                     })
                 }])
+
+                location.reload()
             }catch(e) {
                 console.error(e)
             }
 
-            this.inProgress = false
-            this.isEdit = true
+            // this.inProgress = false
+            // this.isEdit = true
         }
     },
 }
