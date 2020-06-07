@@ -6,6 +6,7 @@ use App\Eloquents\OffHour;
 use App\Eloquents\Shift;
 use App\Eloquents\WorkType;
 use App\Http\Controllers\Controller;
+use App\Rules\ExistsIdArray;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -152,5 +153,18 @@ class ShiftMaintenanceController extends Controller
                 'shifts' => $respShifts,
             ],
         ];
+    }
+
+    public function delete(Request $request)
+    {
+        $request->validate([
+            'task_id' => ['required', new ExistsIdArray($request, Shift::class)],
+        ]);
+
+        DB::transaction(function () use($request) {
+            Shift::whereIn('id', $request->task_id)->delete();
+        });
+
+        return ['Result' => 'OK'];
     }
 }

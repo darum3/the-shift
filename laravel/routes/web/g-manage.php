@@ -18,10 +18,12 @@ Route::group(['prefix' => 'user'], function() {
 });
 
 Route::group(['prefix' => 'shift'], function() {
+    // 自グループのシフト操作
     Route::get('/', 'ShiftEditController@view')->name('g-manage.shift.view');
 
     Route::group(['prefix' => 'json', 'middleware' => 'json'], function() {
         Route::post('/', 'ShiftMaintenanceController@insert')->name('g-manage.shift.json.insert');
         Route::get('/{date?}', 'ShiftMaintenanceController@get')->name('g-manage.shift.json.get');
+        Route::delete('/',ShiftMaintenanceController::class.'@delete')->name('g-manage.shift.json.delete');
     });
 });
