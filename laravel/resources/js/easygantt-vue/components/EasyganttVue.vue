@@ -1,18 +1,31 @@
 <template>
 <div id="easygantt-area">
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
-        <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span>
-        <span v-if="isEdit" class="chart_header">：入力モード
-            <select v-model="current_work_type">
-                <option
-                    v-for="work_type in work_types" :key="work_type.code"
-                    :selected="current_work_type === work_type.code"
-                    :style="'backgroud-color: ' + work_type.work_color"
-                    :value="work_type.code">
-                    {{work_type.name}}
-                </option>
-            </select>
-            <button class='btn btn-sm btn-light' style='margin-left: 1em;' @click="updateData" :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">保存</button>
+        <span :id="'date' + i" class="chart_header"><input type='date' :value="dailyTasks.date" @change="changeDate" /></span>
+        <span v-if="isEdit" class="chart_header">
+            <span v-if="dailyTasks.fixed">確定済み</span>
+            <span v-else style="margin-left: 1em;">
+                入力モード
+                <select v-model="current_work_type">
+                    <option
+                        v-for="work_type in work_types" :key="work_type.code"
+                        :selected="current_work_type === work_type.code"
+                        :style="'backgroud-color: ' + work_type.work_color"
+                        :value="work_type.code">
+                        {{work_type.name}}
+                    </option>
+                </select>
+                <button
+                    class='btn btn-sm btn-light' style='margin-left: 1em;'
+                    @click="updateData"
+                    :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">
+                    保存
+                </button>
+                <button class='btn btn-sm btn-success' style='margin-left: 1em;'
+                    @click="fixShift(dailyTasks.date)">
+                    シフト確定
+                </button>
+            </span>
         </span>
         <span v-if="inProgress" class='text-success blinking' style='font-size: 1.2em;'>更新中</span>
         <div class='daily-area'>
@@ -20,6 +33,7 @@
                 :name-width="nameWidth" :single-time-scale-width="singleTimeScaleWidth"
                 :open="openHhmm" :close="closeHhmm"
                 @delete="deleteConfirm()"
+                :delEnable="isEdit && !dailyTasks.fixed"
             ></easygantt-time-scale>
             <ul :id="'task'+i" class="data">
                 <li v-for="(userShift) in dailyTasks.shifts" :key="userShift.task.task_id"
@@ -47,7 +61,7 @@
                 <li>
                     <!-- 最終の空行 -->
                     <div :style="'width: ' +nameWidth+'px;'" class="person_add">
-                        <div v-if="isEdit"><button class="btn btn-light btn-sm" @click="addLine(dailyTasks.date)">＋</button></div>
+                        <div v-if="isEdit && !dailyTasks.fixed"><button class="btn btn-light btn-sm" @click="addLine(dailyTasks.date)">＋</button></div>
                         <div v-else>&nbsp;</div>
                     </div>
                     <div class="person_shift">
@@ -69,6 +83,12 @@
         :message="deleteMsg"
         @ok="deleteExec()"
         @cancel="showDeleteDialog = false"
+    ></ok-cancel-dialog>
+    <ok-cancel-dialog width="80%"
+        v-if="showFixDialog"
+        :message="fixMessage"
+        @ok="fixExec()"
+        @cancel="showFixDialog = false"
     ></ok-cancel-dialog>
 </div>
 </template>
@@ -128,6 +148,10 @@ export default {
             divPageX: null,
             showDeleteDialog: false,
             deleteMsg: '削除しますか？',
+            // 確定処理
+            showFixDialog: false,
+            fixedDate: null,
+            fixMessage: 'シフトを確定します. グループのメンバーに通知されます(予定).',
 
             moveStart: null,
 
@@ -406,7 +430,28 @@ export default {
 
             // this.inProgress = false
             // this.isEdit = true
-        }
+        },
+        fixShift(date) {
+            this.fixedDate = date
+            this.showFixDialog = true
+        },
+        async fixExec() {
+            this.isEdit = false
+            this.inProgress = true
+
+            try {
+                await axios.post(this.restApi + '/fix', {'date': this.fixedDate})
+
+                location.reload()
+            } catch(e) {
+                // TODO ハンドリング
+                console.error(e)
+            }
+        },
+        changeDate(e) {
+            let date = e.target.value
+            location.href = location.origin + location.pathname + '?date=' + date
+        },
     },
 }
 </script>
@@ -486,38 +531,6 @@ export default {
             }
         }
 
-        // // バブルの色：TODO
-        // .work_type_01 {
-        //     span.bubble {
-        //         background-color: #2b8fef;
-        //     }
-        // }
-        // .work_type_02 {
-        //     span.bubble {
-        //         background-color: #13d604;
-        //     }
-        // }
-        // .work_type_03 {
-        //     span.bubble {
-        //         background-color: #ffe74d;
-        //     }
-        // }
-        // .work_type_04 {
-        //     span.bubble {
-        //         background-color: #8470ff;
-        //     }
-        // }
-        // .work_type_05 {
-        //     span.bubble {
-        //         background-color: #ffc0cb;
-        //     }
-        // }
-        // .work_type_06 {
-        //     span.bubble {
-        //         background-color: #a9a9a9;
-        //     }
-        // }
-
         div:not(.milestone){
             .bubble {
                 height: 20px;
@@ -553,6 +566,11 @@ export default {
         .create_shift {
             cursor: text;
         }
+    }
+    input[type="date"] {
+        color: white;
+        background-color: black;
+        cursor: pointer;
     }
 }
 .person_delete {

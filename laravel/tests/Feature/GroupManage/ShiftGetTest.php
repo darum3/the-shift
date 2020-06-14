@@ -10,6 +10,7 @@ use App\User;
 use App\Eloquents\Contract;
 use App\Eloquents\Group;
 use App\Eloquents\Shift;
+use App\Eloquents\ShiftFixedDate;
 use App\Eloquents\UserGroup;
 use App\Eloquents\WorkType;
 use Illuminate\Foundation\Testing\TestResponse;
@@ -68,6 +69,7 @@ class ShiftGetTest extends TestCase
             "tasks" => [
                 [
                     "date" => today()->toDateString(),
+                    'fixed' => false,
                     "shifts" => [
                         [
                             "user_id" => $this->workUsers[0]->id,
@@ -83,5 +85,22 @@ class ShiftGetTest extends TestCase
                 ],
             ],
         ], true);
+    }
+
+    public function test確定フラグが取れること()
+    {
+        factory(ShiftFixedDate::class)->create([
+            'group_id' => $this->group->id,
+            'date_fixed' => today(),
+        ]);
+        $this->callTargetInterface()->assertOk()
+        ->assertJson([
+            "tasks" => [
+                [
+                    "date" => today()->toDateString(),
+                    'fixed' => true,
+                ],
+            ],
+        ]);
     }
 }

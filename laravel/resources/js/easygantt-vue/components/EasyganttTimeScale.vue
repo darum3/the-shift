@@ -1,7 +1,8 @@
 <template>
     <div class="scale">
         <section :style="'width:'+nameWidth+'px;'" class="person_name">
-            <div class='person_delete' :style="'width:'+nameWidth+'px; height:30px;'" @click="$emit('delete')"></div>
+            <div v-if="delEnable" class='person_delete' :style="'width:'+nameWidth+'px; height:30px;'" @click="$emit('delete')"></div>
+            <div v-else :style="'width:'+nameWidth+'px;'">&nbsp;</div>
         </section>
         <section v-for="time in timeScale" :style="'width:'+singleTimeScaleWidth+'px;'" :key="time">
             {{time}}
@@ -26,6 +27,10 @@ export default {
         close: {
             required: true,
         },
+        delEnable: {
+            type: Boolean,
+            default: false,
+        }
     },
     data() {
         return {

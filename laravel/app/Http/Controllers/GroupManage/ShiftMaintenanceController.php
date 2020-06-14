@@ -156,6 +156,7 @@ class ShiftMaintenanceController extends Controller
             "tasks" => [
                 [
                     'date' => $carbon->toDateString(),
+                    'fixed' => !is_null(ShiftFixedDate::whereGroupId(session('group_id'))->whereDateFixed($carbon)->first()),
                     'shifts' => $respShifts,
                 ],
             ],
