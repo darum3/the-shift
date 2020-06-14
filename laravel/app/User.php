@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Eloquents\Contract;
 use App\Eloquents\Group;
 use App\Eloquents\UserGroup;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -49,8 +50,11 @@ class User extends Authenticatable
         return $this->flg_system_admin == true;
     }
 
-    // public function isManager()
-    // {
-    //     return $this->load()
-    // }
+    public function isManager(int $contractId)
+    {
+        $groups = $this->load('groups')->groups;
+        return $groups->first(function($value, $key) use($contractId) {
+            return $value->flg_admin && $value->contract_id === $contractId;
+        });
+    }
 }

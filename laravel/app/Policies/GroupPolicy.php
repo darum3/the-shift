@@ -53,7 +53,8 @@ class GroupPolicy
      */
     public function update(User $user, Group $group)
     {
-        //
+        return $group->contract_id === session('contract_id')
+            && $user->isManager(session('contract_id'));
     }
 
     /**
