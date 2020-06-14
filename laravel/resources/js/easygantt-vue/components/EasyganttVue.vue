@@ -3,6 +3,15 @@
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
         <span :id="'date' + i" class="chart_header">{{dailyTasks.date}}</span>
         <span v-if="isEdit" class="chart_header">：入力モード
+            <select v-model="current_work_type">
+                <option
+                    v-for="work_type in work_types" :key="work_type.code"
+                    :selected="current_work_type === work_type.code"
+                    :style="'backgroud-color: ' + work_type.work_color"
+                    :value="work_type.code">
+                    {{work_type.name}}
+                </option>
+            </select>
             <button class='btn btn-sm btn-light' style='margin-left: 1em;' @click="updateData" :disabled="inProgress || Object.keys(dailyTasks.shifts).length == 0">保存</button>
         </span>
         <span v-if="inProgress" class='text-success blinking' style='font-size: 1.2em;'>更新中</span>
@@ -17,10 +26,13 @@
                     :class="{'user-select' : userShift.in_select}">
                     <div :style="'width: '+nameWidth+'px;'" class='person_name'
                         @click="onClickName(userShift)">{{userShift.name}}</div>
-                    <div v-if="Object.keys(userShift.task).length != 0" :class="work_types[userShift.task.work_type].category" class="person_shift"
+                    <div v-if="Object.keys(userShift.task).length != 0" class="person_shift"
                         @mouseup="endShiftCreate(userShift, $event)" @mousemove="shiftMouseMove(userShift, $event)">
                         <span class="bubble" id='shift_bubble'
-                            :style="'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px; width:' + userShift.task.duration*widthAboutMin+'px;'"
+                            :style="
+                                'margin-left:'+(userShift.task.startTaskMin*widthAboutMin+nameWidth+1)+'px;' +
+                                'width:' + userShift.task.duration*widthAboutMin+'px;' +
+                                'background-color: ' + work_types[userShift.task.work_type].work_color + ';'"
                             :class="{'ew-resizable' : userShift.resize_startTime === true || userShift.resize_endTime === true, movable : isEdit, moving : userShift.in_drag=='time_change'}"
                             @mousedown="onMousedownBubble(userShift, $event)" @mouseup="endShiftCreate(userShift, $event)">
                         </span>
@@ -107,6 +119,7 @@ export default {
             widthAboutMin: 0, //1分毎の幅px
 
             nameWidth: 50, //px
+            current_work_type: null,
 
             isEdit: false,
 
@@ -150,6 +163,7 @@ export default {
                 headers: {'Content-Type': 'application/json'}
             })
             this.work_types = resp.data.work_types
+            this.current_work_type = Object.keys(this.work_types)[0]
             this.tasks = resp.data.tasks
             this.calcTaskTimes()
         },
@@ -227,7 +241,7 @@ export default {
             this.$set(shift.task, 'endTime', startTime) // 初期は同じ数字
             this.$set(shift.task, 'startTaskMin', startTaskMin)
             this.$set(shift.task, 'duration', 0)
-            this.$set(shift.task, 'work_type', 'MAKE') // TODO 選択する
+            this.$set(shift.task, 'work_type', this.current_work_type)
 
             this.divPageX = window.pageXOffset + event.target.getBoundingClientRect().left
             shift.in_drag = 'create'
@@ -472,37 +486,37 @@ export default {
             }
         }
 
-        // バブルの色：TODO
-        .work_type_01 {
-            span.bubble {
-                background-color: #2b8fef;
-            }
-        }
-        .work_type_02 {
-            span.bubble {
-                background-color: #13d604;
-            }
-        }
-        .work_type_03 {
-            span.bubble {
-                background-color: #ffe74d;
-            }
-        }
-        .work_type_04 {
-            span.bubble {
-                background-color: #8470ff;
-            }
-        }
-        .work_type_05 {
-            span.bubble {
-                background-color: #ffc0cb;
-            }
-        }
-        .work_type_06 {
-            span.bubble {
-                background-color: #a9a9a9;
-            }
-        }
+        // // バブルの色：TODO
+        // .work_type_01 {
+        //     span.bubble {
+        //         background-color: #2b8fef;
+        //     }
+        // }
+        // .work_type_02 {
+        //     span.bubble {
+        //         background-color: #13d604;
+        //     }
+        // }
+        // .work_type_03 {
+        //     span.bubble {
+        //         background-color: #ffe74d;
+        //     }
+        // }
+        // .work_type_04 {
+        //     span.bubble {
+        //         background-color: #8470ff;
+        //     }
+        // }
+        // .work_type_05 {
+        //     span.bubble {
+        //         background-color: #ffc0cb;
+        //     }
+        // }
+        // .work_type_06 {
+        //     span.bubble {
+        //         background-color: #a9a9a9;
+        //     }
+        // }
 
         div:not(.milestone){
             .bubble {
