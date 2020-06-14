@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\GroupManage;
 
+use App\Eloquents\Group;
 use App\Eloquents\OffHour;
 use App\Eloquents\Shift;
+use App\Eloquents\ShiftFixedDate;
+use App\Eloquents\UserGroup;
 use App\Eloquents\WorkType;
 use App\Http\Controllers\Controller;
 use App\Rules\ExistsIdArray;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -166,6 +170,30 @@ class ShiftMaintenanceController extends Controller
 
         DB::transaction(function () use($request) {
             Shift::whereIn('id', $request->task_id)->delete();
+        });
+
+        return ['Result' => 'OK'];
+    }
+
+    public function fix(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $userGroup = UserGroup::whereUserId(Auth::user()->id)->whereGroupId(session('group_id'))->first();
+        $this->authorize('update', $userGroup);
+
+        $date = $request->date;
+        if (!is_null(ShiftFixedDate::whereGroupId(session('group_id'))->whereDateFixed($date)->first())) {
+            abort(409);
+        }
+
+        DB::transaction(function () use($date) {
+            ShiftFixedDate::create([
+                'group_id' => session('group_id'),
+                'date_fixed' => $date,
+            ]);
         });
 
         return ['Result' => 'OK'];

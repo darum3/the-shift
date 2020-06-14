@@ -54,7 +54,14 @@ class UserGroupPolicy
      */
     public function update(User $user, UserGroup $userGroup)
     {
-        //
+        // Adminまたは、Manager（組織の管理グループ所属＝本部）だったらOK
+        if ($user->isSysAdmin() || $user->isManager($userGroup->load('group')->group->contract_id)) {
+            return true;
+        }
+
+        // 自分がグループのAdmin(=店長)だったらOK
+        $userGroup = UserGroup::whereUserId($user->id)->whereGroupId($userGroup->group_id)->first();
+        return optional($userGroup)->flg_admin;
     }
 
     /**
@@ -79,7 +86,7 @@ class UserGroupPolicy
             return true;
         }
 
-        // 自分がグループのAdminだったらOK
+        // 自分がグループのAdmin(=店長)だったらOK
         $userGroup = UserGroup::whereUserId($user->id)->whereGroupId($userGroup->group_id)->get();
         return optional($userGroup)->flg_admin;
     }

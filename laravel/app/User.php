@@ -50,6 +50,9 @@ class User extends Authenticatable
         return $this->flg_system_admin == true;
     }
 
+    /**
+     * 管理グループに所属しているか
+     */
     public function isManager(int $contractId)
     {
         $groups = $this->load('groups')->groups;

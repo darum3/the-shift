@@ -29,5 +29,6 @@ Route::group(['prefix' => 'shift'], function() {
         Route::post('/', 'ShiftMaintenanceController@insert')->name('g-manage.shift.json.insert');
         Route::get('/{date?}', 'ShiftMaintenanceController@get')->name('g-manage.shift.json.get');
         Route::delete('/',ShiftMaintenanceController::class.'@delete')->name('g-manage.shift.json.delete');
+        Route::post('/fix', ShiftMaintenanceController::class.'@fix')->name('g-manage.shift.json.fix');
     });
 });
