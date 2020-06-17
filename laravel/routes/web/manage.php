@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Manage\WorkTypeController;
-
 Route::group(['prefix' => 'work_type'], function() {
     Route::get('/', 'WorkTypeController@index')->name('manage.work_type');
     Route::group(['prefix' => 'add'], function() {

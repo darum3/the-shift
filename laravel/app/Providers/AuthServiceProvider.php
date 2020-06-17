@@ -42,6 +42,10 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('G-MNG', function() {
+            return UserGroup::whereUserId(Auth::user()->id)->whereGroupId(session('group_id'))->whereFlgAdmin(true)->count() > 0;
+        });
+
+        Gate::define('MEMBER', function() {
             return UserGroup::whereUserId(Auth::user()->id)->whereGroupId(session('group_id'))->count() > 0;
         });
     }

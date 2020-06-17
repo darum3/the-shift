@@ -9,6 +9,7 @@ class Shift extends BaseModel
 {
     protected $guarded = ["id", "created_at", "updated_at", "version"];
     protected $hidden = ['version'];
+    protected $dates = ['start_datetime', 'end_datetime'];
 
     ////
     // Relation
@@ -45,5 +46,17 @@ class Shift extends BaseModel
     public function scopeAfter($query, CarbonImmutable $date)
     {
         return $query->where('start_datetime', '>=', $date->startOfDay()->hour(5));
+    }
+
+    public function scopeMonth($query, int $groupId, int $userId, CarbonImmutable $carbon)
+    {
+        $start = $carbon->startOfMonth()->startOfDay()->hour(5);
+        $end = $carbon->startOfMonth()->startOfDay()->addMOnth()->hour(5);
+        return $query->where([
+            ['group_id', '=', $groupId],
+            ['user_id', '=', $userId],
+            ['start_datetime', '>=', $start],
+            ['start_datetime', '<', $end],
+        ]);
     }
 }

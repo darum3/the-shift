@@ -2,9 +2,9 @@
 <div id="easygantt-area">
     <div class='chart' v-for="(dailyTasks, i) in tasks" :key="dailyTasks.date">
         <span :id="'date' + i" class="chart_header"><input type='date' :value="dailyTasks.date" @change="changeDate" /></span>
+        <span v-if="dailyTasks.fixed" class='chart_header'>確定済み</span>
         <span v-if="isEdit" class="chart_header">
-            <span v-if="dailyTasks.fixed">確定済み</span>
-            <span v-else style="margin-left: 1em;">
+            <span v-if="!dailyTasks.fixed" style="margin-left: 1em;">
                 入力モード
                 <select v-model="current_work_type">
                     <option
@@ -58,7 +58,7 @@
                         &nbsp;
                     </div>
                 </li>
-                <li>
+                <li v-if="isEdit && !dailyTasks.fixed">
                     <!-- 最終の空行 -->
                     <div :style="'width: ' +nameWidth+'px;'" class="person_add">
                         <div v-if="isEdit && !dailyTasks.fixed"><button class="btn btn-light btn-sm" @click="addLine(dailyTasks.date)">＋</button></div>

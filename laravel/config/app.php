@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\HelperServiceProvider;
+
 return [
 
     /*
@@ -176,6 +178,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\DataBaseQueryServiceProvider::class,
         App\Providers\ValidatorServiceProvider::class,
+        HelperServiceProvider::class,
 
     ],
 

@@ -30,7 +30,7 @@ export default {
         },
         edit: {
             type: Boolean,
-            default: true,
+            default: false,
         },
         userListApi: {
             type: String,
