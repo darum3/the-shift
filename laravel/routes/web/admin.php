@@ -11,6 +11,10 @@ Route::group(['prefix' => '/contract'], function() {
         Route::post('/confirm', 'ContractController@inputConfirm')->name('admin.contract.input.confirm');
         Route::post('/exec', 'ContractController@inputExec')->name('admin.contract.input.exec');
         Route::post('/back', 'ContractController@inputBack')->name('admin.contract.input.back');
+    });
 
+    Route::group(['prefix' => 'edit/{contract_id}'], function () {
+        Route::get('/', 'ContractController@edit')->name('admin.contract.edit');
+        Route::post('/confirm', 'ContractController@editConfirm')->name('admin.contract.edit.confirm');
     });
 });

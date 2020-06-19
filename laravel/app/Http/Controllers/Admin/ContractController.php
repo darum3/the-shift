@@ -7,6 +7,7 @@ use App\Eloquents\Group;
 use App\Eloquents\UserGroup;
 use App\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ContractEdit;
 use App\Http\Requests\Admin\ContractInputConfirm;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,7 @@ class ContractController extends Controller
 
     public function show(int $id)
     {
-        $contract = Contract::findOrFail($id)->load('groups', 'groups.users');
+        $contract = Contract::findOrFail($id)->load('groups', 'groups.users', 'allow_functions');
         return view('admin.contract.show', compact('contract'));
     }
 
@@ -71,5 +72,34 @@ class ContractController extends Controller
 
         $request->session()->flash('contract-input-success');
         return redirect()->route('admin.contract');
+    }
+
+    public function edit(int $contract_id)
+    {
+        $data = Contract::findOrFail($contract_id)->load('groups', 'groups.users', 'allow_functions');
+        $action = route('admin.contract.edit.confirm', compact('contract_id'));
+        $fields = [
+            ['label' => '契約名', 'width' => 3, 'name' => 'name'],
+            ['label' => 'シフト機能', 'width' => 1, 'name' => 'allow_functions.per_shift', 'type' => 'checkbox'],
+            ['label' => 'タイムカード機能', 'width' => 1, 'name' => 'allow_functions.per_time_record', 'type' => 'checkbox'],
+            ['label' => '給与計算機能', 'width' => 1, 'name' => 'allow_functions.per_payment', 'type' => 'checkbox'],
+        ];
+        return view('admin.contract.edit.input', compact('data', 'action', 'fields'));
+    }
+
+    public function editConfirm(int $contract_id, ContractEdit $request)
+    {
+        if ($request->has('back')) {
+            return redirect()->route('admin.contract');
+        }
+        $data = $request->all();
+        $action = route('admin.contract.edit.confirm', compact('contract_id'));
+        $fields = [
+            ['label' => '契約名', 'width' => 3, 'name' => 'name'],
+            ['label' => 'シフト機能', 'width' => 1, 'name' => 'allow_functions.per_shift', 'type' => 'checkbox'],
+            ['label' => 'タイムカード機能', 'width' => 1, 'name' => 'allow_functions.per_time_record', 'type' => 'checkbox'],
+            ['label' => '給与計算機能', 'width' => 1, 'name' => 'allow_functions.per_payment', 'type' => 'checkbox'],
+        ];
+        return view('admin.contract.edit.confirm', compact('data', 'action', 'fields'));
     }
 }

@@ -9,7 +9,7 @@
 <table class='table table-sm'>
     <tbody>
         <tr>
-            <th scope='row'>契約名</th>
+            <th scope='row' style='width: 10%'>契約名</th>
             <td>{{$contract->name}}</td>
         </tr>
         <tr>
@@ -21,6 +21,21 @@
             <td>{{ $contract->groups->sum(function($group) {
                 return count($group->users);
             }) }}</td>
+        </tr>
+        <tr>
+            <th class='table-success' colspan="2" scope='col'>管理者情報</th>
+        </tr>
+        <tr>
+            <th scope="row">シフト機能</th>
+            <td>@if(optional($contract->allow_functions)->per_shift)●@elseー@endif</td>
+        </tr>
+        <tr>
+            <th scope="row">タイムレコード機能</th>
+            <td>@if(optional($contract->allow_functions)->per_time_record)●@elseー@endif</td>
+        </tr>
+        <tr>
+            <th scope="row">給与計算機能</th>
+            <td>@if(optional($contract->allow_functions)->per_payment)●@elseー@endif</td>
         </tr>
         <tr>
             <th class='table-success' colspan="2" scope='col'>管理者情報</th>

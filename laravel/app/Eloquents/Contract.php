@@ -15,6 +15,13 @@ class Contract extends BaseModel
         return $this->hasMany(Group::class);
     }
 
+    public function allow_functions()
+    {
+        return $this->hasOne(AllowFunction::class);
+    }
+
+    ////
+    // Scope Query
     public function scopeAllContract($query)
     {
         return $query->where('id', '<>', 1);

@@ -14,7 +14,7 @@
     <a class='btn btn-primary' href="{{route('admin.contract.input')}}">追加</a>
 </div>
 {{-- TODO 検索 --}}
-<table class="table table-bordered table-hover">
+<table class="table table-bordered table-hover" style='width:800px;'>
     <thead class='thead-dark'>
         <tr>
             <th scope='col' style='width: 25%'>会社名</th>
@@ -25,7 +25,10 @@
         @foreach($contract as $row)
         <tr>
             <td>{{$row->name}}</td>
-            <td><a href="{{ route('admin.contract.show', ['id' => $row->id]) }}" class='btn btn-sm btn-secondary'>詳細</a></td>
+            <td>
+                <a href="{{ route('admin.contract.show', ['id' => $row->id]) }}" class='btn btn-sm btn-secondary'>詳細</a>
+                <a href="{{ route('admin.contract.edit', ['contract_id' => $row->id]) }}" class='btn btn-sm btn-warning'>編集</a>
+            </td>
         </tr>
         @endforeach
     </tbody>

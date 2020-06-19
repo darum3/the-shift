@@ -10,12 +10,22 @@
     <div class="form-group row">
         <label for="{{$field['name']}}" class="col-sm-2 col-form-label">{{$field['label']}}</label>
         <div class="{{'col-sm-'.$field['width']}}">
+            @if(($field['type'] ?? 'text') === 'checkbox')
+            <div class='custom-control custom-checkbox'>
+                <input
+                    type="checkbox"
+                    id="{{$field['name']}}"
+                    name="{{$field['name']}}"
+                    @if(old($field['name'], $data[$field['name']])) checked @endif />
+            </div>
+            @else
             <input
                 type="{{$field['type'] ?? 'text'}}"
                 class="form-control @error($field['name']) is-invalid @enderror"
                 id="{{$field['name']}}"
                 name="{{$field['name']}}"
                 value="{{ old($field['name'], $data[$field['name']]) }}" />
+            @endif
             @error($field['name']) <span class='invalid-feedback' role='alert'><strong>{{$message}}</strong></span> @enderror
         </div>
     </div>

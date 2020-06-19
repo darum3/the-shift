@@ -14,8 +14,26 @@
                     <div style="border: 1px solid black; background-color:{{ $data[$field['name']] }};">
                         {{ $data[$field['name']] }}
                     </div>
+                @elseif($type === 'checkbox')
+                    @if(
+                        isset(
+                            $data[
+                                str_replace('.', '_', $field['name'])
+                            ]
+                        )
+                        && in_array(
+                            $data[
+                                str_replace('.', '_', $field['name'])
+                            ]
+                            , ['on', 1, true]
+                        )
+                    )
+                    ●
+                    @endif
                 @else
-                    {{$data[$field['name']]}}
+                    {{ $data[
+                        str_replace('.', '_', $field['name'])
+                    ] }}
                 @endif
             </td>
         </tr>
@@ -26,7 +44,24 @@
 <form method=POST class='d-inline' action={{$action}}>
     @csrf
     @foreach ($fields as $field)
-    <input type='hidden' name="{{$field['name']}}" value="{{$data[$field['name']]}}" />
+    @php $type = $field['type'] ?? 'text'; @endphp
+    @if($type === 'checkbox')
+        @if(
+            isset($data[
+                str_replace('.', '_', $field['name'])
+            ])
+            && in_array($data[str_replace('.', '_', $field['name'])]
+                , ['on', 1, true]
+            ))
+        <input type='hidden' name="{{$field['name']}}" value="1" />
+        @endif
+    @else
+        <input type='hidden' name="{{$field['name']}}" value="{{
+            $data[
+                str_replace('.', '_', $field['name'])
+            ]
+        }}" />
+    @endif
     @endforeach
 
     <button type='submit' class='btn btn-primary'>登録</button>
