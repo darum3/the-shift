@@ -44,6 +44,7 @@
                         <li class='nav-item'><a href="{{ route('member.shift') }}" class='nav-link'>シフト表示</a></li>
                         @elsecan('MEMBER')
                         <li class='nav-item'><a href="{{ route('member.shift') }}" class='nav-link'>シフト表示</a></li>
+                        <li class='nav-item'><a href="{{ route('member.desired') }}" class="nav-link">シフト提出</a></li>
                         @endcan
                     </ul>
 
