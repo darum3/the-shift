@@ -12,4 +12,8 @@ Route::group(['prefix' => 'shift'], function() {
 Route::group(['prefix' => 'desired'], function() {
     Route::get('/{week?}', DesiredController::class.'@list')->name('member.desired');
     Route::get('/edit/{date}', DesiredController::class.'@edit')->name('member.desired.edit');
+
+    Route::group(['prefix' => 'json', 'middleware' => 'json'], function () {
+        Route::post('register', DesiredController::class.'@register')->name('member.desired.register');
+    });
 });
