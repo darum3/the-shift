@@ -17,12 +17,14 @@ class DesiredRegisterTest extends MemberTestCase
         $response = $this->JsonActingAsWithGroup($this->user, $this->group, 'POST',
             'member/desired/json/register',
             [
-                'target_date' => today()->toDateString(),
-                'desired' => [
-                    [
-                        'work_type' => $this->workType->code,
-                        'start' => '09:00',
-                        'end' => '18:00',
+                [
+                    'target_date' => today()->toDateString(),
+                    'desired' => [
+                        [
+                            'work_type' => $this->workType->code,
+                            'start' => '09:00',
+                            'end' => '18:00',
+                        ],
                     ],
                 ],
             ]

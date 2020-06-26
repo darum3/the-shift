@@ -56,27 +56,29 @@ class DesiredController extends Controller
         DB::transaction(function () use($request) {
             $groupId = session('group_id');
             $userId = Auth::user()->id;
-            $targetDate = CarbonImmutable::create($request->target_date);
+            foreach($request->all() as $data) {
+                $targetDate = CarbonImmutable::create($data['target_date']);
 
-            DesiredShift::where([
-                'group_id' => $groupId,
-                'user_id' => $userId,
-                'date_target' => $targetDate->toDateString(),
-            ])->delete();
-
-            foreach($request->desired as $desired) {
-                $workTypeId = WorkType::where([
-                    'contract_id' => session('contract_id'),
-                    'code' => $desired['work_type'],
-                ])->first()->id;
-                DesiredShift::create([
+                DesiredShift::where([
                     'group_id' => $groupId,
                     'user_id' => $userId,
                     'date_target' => $targetDate->toDateString(),
-                    'work_type_id' => $workTypeId,
-                    'time_start' => CarbonImmutable::parse($desired['start']),
-                    'time_end' => CarbonImmutable::parse($desired['end']),
-                ]);
+                ])->delete();
+
+                foreach($data['desired'] as $desired) {
+                    $workTypeId = WorkType::where([
+                        'contract_id' => session('contract_id'),
+                        'code' => $desired['work_type'],
+                    ])->first()->id;
+                    DesiredShift::create([
+                        'group_id' => $groupId,
+                        'user_id' => $userId,
+                        'date_target' => $targetDate->toDateString(),
+                        'work_type_id' => $workTypeId,
+                        'time_start' => CarbonImmutable::parse($desired['start']),
+                        'time_end' => CarbonImmutable::parse($desired['end']),
+                    ]);
+                }
             }
         });
 

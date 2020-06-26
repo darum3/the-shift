@@ -25,15 +25,15 @@ class DesiredRegister extends FormRequest
     public function rules()
     {
         return [
-            'target_date' => ['required', 'date'],
-            'desired' => ['required', 'array'],
-            'desired.*.work_type' => ['nullable',
+            '*.target_date' => ['required', 'date'],
+            '*.desired' => ['required', 'array'],
+            '*.desired.*.work_type' => ['nullable',
                 Rule::exists('work_types', 'code')->where(function($query) {
                     $query->where('contract_id', session('contract_id'));
                 }),
             ],
-            'desired.*.start' => ['required', 'date_format:H:i'],
-            'desired.*.end' => ['required', 'date_format:H:i'],
+            '*.desired.*.start' => ['required', 'date_format:H:i'],
+            '*.desired.*.end' => ['required', 'date_format:H:i'],
         ];
     }
 }
