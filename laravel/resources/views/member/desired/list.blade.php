@@ -27,6 +27,9 @@
     </div>
 
     <div class='card-body'>
+        @if(session('member.desired.fix'))
+        <div class='alert-info'>シフトを提出しました</div>
+        @endif
         <table class='table table-sm table-striped table-border'>
             <thead class='table-success'>
                 <tr>
@@ -39,15 +42,16 @@
             <tbody>
                 @for($it = $from->toMutable(); $it <= $to; $it->addDay())
                 @php
-                    $dayData = $desired->get($it->toDateString());
+                    $dayData = $desired->get($it->toDateString()) ?? [];
                     $fixed = $inputed->contains($it->toDateString());
                     $count = $count ?? 0 + is_null(optional($dayData)->first()) ? 0 : 1;
                 @endphp
                 <tr @if($fixed) class='table-secondary' @endif>
                     <td>
-                        @if(!$fixed && !is_null(optional($dayData)->first()))
-                        <form method=POST>
-                            <button name='date' value="{{ $it->toDateString() }}">提出</button>
+                        @if(!$fixed)
+                        <form method=POST action="{{ route('member.desired.fix') }}">
+                            @csrf
+                            <button name='date[]' value="{{ $it->toDateString() }}">提出</button>
                         </form>
                         @endif
                     </td>
@@ -61,8 +65,8 @@
                     </td>
                     <td>@if($fixed) ● @else &nbsp; @endif</td>
                     <td>
-                        @foreach (optional($dayData) as $item)
-                            <div>{{$item->time_start->format('H:i')}}〜{{$item->time_end->format('H:i')}}</div>
+                        @foreach ($dayData as $item)
+                            {{substr($item->time_start, 0, 5)}}〜{{substr($item->time_end, 0, 5)}}
                         @endforeach
                     </td>
                 </tr>
@@ -71,7 +75,7 @@
             @if($count === 7)一括確定@endif
         </table>
         <div>
-            「提出」を行わないと入力しても提出されません。
+            「提出」を行わないと入力しても提出されません。不可の場合も空のまま提出が必要です。
         </div>
     </div>
 </div>

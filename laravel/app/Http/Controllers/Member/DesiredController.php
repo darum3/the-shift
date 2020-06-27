@@ -48,8 +48,14 @@ class DesiredController extends Controller
         $target = CarbonImmutable::parse($date);
         $sunday = $target->startOfWeek(Carbon::SUNDAY);
         $workTypes = WorkType::whereContractId(session('contract_id'))->get();
+        $groupId = session('group_id');
+        $userId = Auth::user()->id;
+        $originalDatas = DesiredShift::whereGroupId($groupId)
+            ->whereUserId($userId)
+            ->whereDateTarget($date)
+            ->get();
 
-        return view('member.desired.edit', compact('target', 'sunday', 'workTypes'));
+        return view('member.desired.edit', compact('target', 'sunday', 'workTypes', 'originalDatas'));
     }
 
     public function register(DesiredRegister $request)
@@ -84,5 +90,29 @@ class DesiredController extends Controller
         });
 
         return ['Result' => 'OK'];
+    }
+
+    public function fix(DesiredFix $request)
+    {
+        DB::transaction(function () use($request) {
+            $groupId = session('group_id');
+            $userId = Auth::user()->id;
+
+            foreach($request->date as $date) {
+                $entity = InputedDate::whereGroupId($groupId)->whereUserId($userId)->whereDateTarget($date)->first();
+                if (is_null($entity)) {
+                    InputedDate::create([
+                        'group_id' => $groupId,
+                        'user_id' => $userId,
+                        'date_target' => $date,
+                    ]);
+                } else {
+                    $entity->save();
+                }
+            }
+        });
+
+        session()->flash('member.desired.fix');
+        return redirect()->route('member.desired');
     }
 }
