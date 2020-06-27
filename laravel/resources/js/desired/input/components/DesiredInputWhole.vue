@@ -89,6 +89,10 @@ export default {
             end: element.time_end.substr(0, 2) + element.time_end.substr(3, 2),
             work_type: this.workTypes.find(work => work.id === element.work_type_id).code
         }))
+        // console.log(this.inputs)
+        if (this.inputs.length === 0) {
+            this.inputs.push({number: 0})
+        }
 
         let today = new Date(this.target)
         let date = new Date(this.sunday)
