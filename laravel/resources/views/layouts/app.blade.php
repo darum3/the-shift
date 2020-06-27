@@ -34,7 +34,8 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
+                    @include('layouts.parts.menu')
+                    {{--  <ul class="navbar-nav mr-auto">
                         @can('MNG')
                         <li class='nav-item'><a href="{{ route('manage.work_type') }}" class='nav-link'>職種設定</a></li>
                         <li class='nav-item'><a href="{{ route('manage.group') }}" class='nav-link'>グループ設定</a></li>
@@ -46,7 +47,7 @@
                         <li class='nav-item'><a href="{{ route('member.shift') }}" class='nav-link'>シフト表示</a></li>
                         <li class='nav-item'><a href="{{ route('member.desired') }}" class="nav-link">シフト提出</a></li>
                         @endcan
-                    </ul>
+                    </ul>  --}}
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">

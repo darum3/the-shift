@@ -4,9 +4,9 @@
 シフト表示【{{session('group_name')}}】
 @endsection
 
-@section('scripts')
+{{--  @section('scripts')  --}}
 {{--  <script type="text/javascript" src="{{asset('js/shift.js')}}" defer></script>  --}}
-@endsection
+{{--  @endsection  --}}
 
 @section('content')
 <div class="card col-sm-6">

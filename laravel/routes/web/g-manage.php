@@ -32,3 +32,7 @@ Route::group(['prefix' => 'shift'], function() {
         Route::post('/fix', ShiftMaintenanceController::class.'@fix')->name('g-manage.shift.json.fix');
     });
 });
+
+Route::group(['prefix' => 'desired'], function() {
+    Route::get('/', DesiredController::class.'@list')->name('g-manage.desired.list');
+});
