@@ -6,6 +6,7 @@ use App\Eloquents\DesiredShift;
 use App\Eloquents\InputedDate;
 use App\Eloquents\WorkType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Member\DesiredFix;
 use App\Http\Requests\Member\DesiredRegister;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -35,7 +36,7 @@ class DesiredController extends Controller
             ->whereUserId($userId)
             ->range($from, $to)
             ->get()
-            ->pluck('date');
+            ->pluck('date_target');
         return view('member.desired.list', compact('from', 'to', 'desired', 'inputed', 'week'));
     }
 

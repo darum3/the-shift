@@ -22,8 +22,8 @@ class DesiredRegisterTest extends MemberTestCase
                     'desired' => [
                         [
                             'work_type' => $this->workType->code,
-                            'start' => '09:00',
-                            'end' => '18:00',
+                            'start' => '0900',
+                            'end' => '1800',
                         ],
                     ],
                 ],

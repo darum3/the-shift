@@ -32,8 +32,8 @@ class DesiredRegister extends FormRequest
                     $query->where('contract_id', session('contract_id'));
                 }),
             ],
-            '*.desired.*.start' => ['required', 'date_format:H:i'],
-            '*.desired.*.end' => ['required', 'date_format:H:i'],
+            '*.desired.*.start' => ['required', 'date_format:Hi'],
+            '*.desired.*.end' => ['required', 'date_format:Hi'],
         ];
     }
 }
