@@ -111,8 +111,9 @@ class DesiredController extends Controller
                 }
             }
         });
+        $week = $request->week;
 
         session()->flash('member.desired.fix');
-        return redirect()->route('member.desired');
+        return redirect()->route('member.desired', compact('week'));
     }
 }

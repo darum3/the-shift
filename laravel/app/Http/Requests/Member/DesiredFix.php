@@ -26,6 +26,7 @@ class DesiredFix extends FormRequest
         return [
             'date' => ['required', 'array'],
             'date.*' => ['date'],
+            'week' => ['required', 'numeric'],
         ];
     }
 }

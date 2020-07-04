@@ -4,9 +4,9 @@
 シフト提出【{{session('group_name')}}】
 @endsection
 
-@section('scripts')
+{{--  @section('scripts')  --}}
 {{--  <script type="text/javascript" src="{{asset('js/shift.js')}}" defer></script>  --}}
-@endsection
+{{--  @endsection  --}}
 
 @section('content')
 <div class='card col-sm-6'>
@@ -33,7 +33,7 @@
         <table class='table table-sm table-striped table-border'>
             <thead class='table-success'>
                 <tr>
-                    <th scope='col'>&nbsp;</th>
+                    <th scope='col' style="width: 15%;">&nbsp;</th>
                     <th scope='col'>日付</th>
                     <th scope='col'>提出済み</th>
                     <th scope='col'>希望時間</th>
@@ -51,6 +51,7 @@
                         @if(!$fixed)
                         <form method=POST action="{{ route('member.desired.fix') }}">
                             @csrf
+                            <input type=hidden name=week value="{{ $week }}" />
                             <button name='date[]' value="{{ $it->toDateString() }}">提出</button>
                         </form>
                         @endif
@@ -59,7 +60,7 @@
                         @if($fixed)
                         <span>{{$it->format('m/d')}}</span>
                         @else
-                        <a href="{{ route('member.desired.edit', ['date' => $it->toDateString()]) }}" class='btn btn-sm btn-link'>{{ $it->format('m/d') }}</a>
+                        <a href="{{ route('member.desired.edit', ['date' => $it->toDateString()]) }}" class='btn btn-link px-0'>{{ $it->format('m/d') }}</a>
                         @endif
                         {!! datetime_html_weekday($it->toImmutable()) !!}
                     </td>
