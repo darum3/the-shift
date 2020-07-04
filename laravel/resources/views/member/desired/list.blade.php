@@ -73,8 +73,17 @@
                 </tr>
                 @endfor
             </tbody>
-            @if($count === 7)一括確定@endif
         </table>
+        <div>
+            <form method="POST" action="{{ route('member.desired.fix') }}">
+                @csrf
+                @for($it = $from->toMutable(); $it <= $to; $it->addDay())
+                <input type=hidden name="date[]" value="{{ $it->toDateString() }}" />
+                @endfor
+                <input type=hidden name=week value="{{ $week }}" />
+                <input type="submit" class="btn btn-success" value="一括提出" />
+            </form>
+        </div>
         <div>
             「提出」を行わないと入力しても提出されません。不可の場合も空のまま提出が必要です。
         </div>
