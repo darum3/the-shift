@@ -9,6 +9,14 @@
 {{--  @endsection  --}}
 
 @section('content')
+<div class='float-left'>
+    <a href="{{ route('g-manage.desired.list', ['start_date' => $date->subWeeks(2)->toDateString()]) }}" class='btn btn-link'>＜＜</a>
+    <a href="{{ route('g-manage.desired.list', ['start_date' => $date->subWeeks(1)->toDateString()]) }}" class='btn btn-link'>＜</a>
+</div>
+<div class='float-right'>
+    <a href="{{ route('g-manage.desired.list', ['start_date' => $date->addWeeks(1)->toDateString()]) }}" class='btn btn-link'>＞</a>
+    <a href="{{ route('g-manage.desired.list', ['start_date' => $date->addWeeks(2)->toDateString()]) }}" class='btn btn-link'>＞＞</a>
+</div>
 <table class='table table-bordered'>
     <thead>
         <tr class='table-success'>
@@ -31,5 +39,6 @@
             @endfor
         </tr>
         @endforeach
+    </tbody>
 </table>
 @endsection

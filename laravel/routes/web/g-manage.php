@@ -34,5 +34,6 @@ Route::group(['prefix' => 'shift'], function() {
 });
 
 Route::group(['prefix' => 'desired'], function() {
-    Route::get('/', DesiredController::class.'@list')->name('g-manage.desired.list');
+    // シフト提出確認
+    Route::get('/{start_date?}', DesiredController::class.'@list')->name('g-manage.desired.list');
 });
